@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
-import { ExchangeRateAPI, RiskScoringEngine, TransactionDatabase } from '../lib/aml-engine-client';
+import { RiskScoringEngine } from '../lib/aml-engine-client';
 
 export default function CSVUpload() {
   const [file, setFile] = useState(null);
@@ -11,9 +11,7 @@ export default function CSVUpload() {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
-  const exchangeAPI = new ExchangeRateAPI('4299650994279511afe6ed48');
   const riskEngine = new RiskScoringEngine();
-  const db = new TransactionDatabase();
 
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
@@ -27,22 +25,80 @@ export default function CSVUpload() {
 
   const processTransaction = async (row) => {
     try {
-      // Convert amount to USD
-      const amountUsd = await exchangeAPI.convertToUSD(
-        parseFloat(row.transaction_amount),
-        row.currency_code,
-        row.transaction_date
-      );
+      // Convert date format from DD-MM-YYYY to YYYY-MM-DD
+      const convertDateFormat = (dateStr) => {
+        if (!dateStr) return dateStr;
+        
+        console.log('Converting date:', dateStr);
+        
+        // Check if date is in DD-MM-YYYY format
+        const ddmmyyyyPattern = /^(\d{2})-(\d{2})-(\d{4})$/;
+        const match = dateStr.toString().match(ddmmyyyyPattern);
+        
+        if (match) {
+          const [, day, month, year] = match;
+          const formatted = `${year}-${month}-${day}`;
+          console.log('Date converted from', dateStr, 'to', formatted);
+          return formatted;
+        }
+        
+        // If already in YYYY-MM-DD format, return as is
+        console.log('Date already in correct format:', dateStr);
+        return dateStr;
+      };
+
+      const formattedDate = convertDateFormat(row.transaction_date);
+      console.log('Final formatted date:', formattedDate);
+
+      // Convert amount to USD using server-side API
+      let amountUsd = parseFloat(row.transaction_amount);
+      
+      try {
+        const response = await fetch('/api/convert-currency', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: parseFloat(row.transaction_amount),
+            fromCurrency: row.currency_code,
+            toCurrency: 'USD',
+            date: formattedDate
+          }),
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          amountUsd = result.convertedAmount;
+        } else {
+          console.error('Currency conversion failed:', result.error);
+          // Use original amount as fallback
+          amountUsd = parseFloat(row.transaction_amount);
+        }
+      } catch (error) {
+        console.error('Currency conversion error:', error);
+        // Use original amount as fallback
+        amountUsd = parseFloat(row.transaction_amount);
+      }
 
       // Calculate risk score
-      const riskResult = riskEngine.calculateRiskScore({
+      const transactionForRisk = {
         ...row,
         transaction_amount: parseFloat(row.transaction_amount),
         amount_usd: amountUsd
-      });
+      };
+      
+      console.log('Transaction for risk scoring:', transactionForRisk);
+      console.log('Amount USD:', amountUsd);
+      console.log('Beneficiary country:', row.beneficiary_country);
+      
+      const riskResult = await riskEngine.calculateRiskScore(transactionForRisk);
+      
+      console.log('Risk result:', riskResult);
 
       return {
         ...row,
+        transaction_date: formattedDate, // Use formatted date
         transaction_amount: parseFloat(row.transaction_amount),
         amount_usd: amountUsd,
         usd_rate: amountUsd / parseFloat(row.transaction_amount),
@@ -68,19 +124,70 @@ export default function CSVUpload() {
 
     try {
       Papa.parse(file, {
-        header: true,
+        header: false, // Don't use first row as headers
         skipEmptyLines: true,
         complete: async (results) => {
+          console.log('CSV parsing results:', results);
+          console.log('First few rows:', results.data.slice(0, 3));
+          
           if (results.errors.length > 0) {
             setError('CSV parsing errors: ' + results.errors.map(e => e.message).join(', '));
             setLoading(false);
             return;
           }
 
-          const transactions = results.data.filter(row => 
-            row.transaction_amount && row.currency_code && row.transaction_date &&
-            Object.keys(row).length > 1 // Ensure row has more than just empty fields
-          );
+          // Map CSV columns to expected field names
+          // Based on your CSV structure: transaction_id, account_id, transaction_date, originator_name, originator_address1, originator_address2, originator_country, beneficiary_name, beneficiary_address1, beneficiary_address2, beneficiary_country, transaction_amount, currency_code, payment_instruction, payment_type
+          const mapRowToTransaction = (row) => {
+            if (!row || row.length < 15) return null;
+            
+            return {
+              transaction_id: row[0],
+              account_id: row[1],
+              transaction_date: row[2],
+              originator_name: row[3],
+              originator_address1: row[4],
+              originator_address2: row[5],
+              originator_country: row[6],
+              beneficiary_name: row[7],
+              beneficiary_address1: row[8],
+              beneficiary_address2: row[9],
+              beneficiary_country: row[10],
+              transaction_amount: row[11],
+              currency_code: row[12],
+              payment_instruction: row[13],
+              payment_type: row[14]
+            };
+          };
+
+          const transactions = results.data
+            .map(mapRowToTransaction)
+            .filter(row => {
+              if (!row) return false;
+              
+              // Check if row has required fields and is not empty
+              const hasRequiredFields = row.transaction_amount && 
+                                      row.currency_code && 
+                                      row.transaction_date &&
+                                      row.originator_name &&
+                                      row.beneficiary_name;
+              
+              // Check if row has actual data (not just empty strings)
+              const hasData = Object.values(row).some(value => 
+                value && value.toString().trim() !== ''
+              );
+              
+              console.log('Row check:', {
+                row: row,
+                hasRequiredFields,
+                hasData,
+                transaction_amount: row.transaction_amount,
+                currency_code: row.currency_code,
+                transaction_date: row.transaction_date
+              });
+              
+              return hasRequiredFields && hasData;
+            });
 
           if (transactions.length === 0) {
             setError('No valid transactions found in CSV');
@@ -109,10 +216,28 @@ export default function CSVUpload() {
             }
           }
 
-          // Save all transactions to database
-          const savedTransactions = processedTransactions.map(transaction => 
-            db.addTransaction(transaction)
-          );
+          // Save all transactions to MongoDB via API
+          const savedTransactions = [];
+          for (const transaction of processedTransactions) {
+            try {
+              const response = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(transaction),
+              });
+              
+              const result = await response.json();
+              if (result.success) {
+                savedTransactions.push(result.transaction);
+              } else {
+                console.error('Failed to save transaction:', result.error);
+              }
+            } catch (error) {
+              console.error('Error saving transaction:', error);
+            }
+          }
 
           setResults({
             total: savedTransactions.length,

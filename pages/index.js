@@ -4,25 +4,35 @@ import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [stats, setStats] = useState({ total: 0, suspicious: 0, normal: 0, suspiciousRate: 0 });
+  const [recentTransactions, setRecentTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/stats');
-        const result = await response.json();
+        // Fetch stats
+        const statsResponse = await fetch('/api/stats');
+        const statsResult = await statsResponse.json();
         
-        if (result.success) {
-          setStats(result.stats);
+        if (statsResult.success) {
+          setStats(statsResult.stats);
+        }
+
+        // Fetch recent transactions (last 5)
+        const transactionsResponse = await fetch('/api/transactions/list?limit=5');
+        const transactionsResult = await transactionsResponse.json();
+        
+        if (transactionsResult.success) {
+          setRecentTransactions(transactionsResult.transactions);
         }
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
 
   return (
@@ -149,12 +159,69 @@ export default function Home() {
           {/* Recent Activity */}
           <div className="mt-8 bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Recent Transactions</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-medium text-gray-900">Recent Transactions</h2>
+                <Link href="/transactions" className="text-sm text-blue-600 hover:text-blue-800">
+                  View All →
+                </Link>
+              </div>
             </div>
             <div className="p-6">
-              <p className="text-gray-500 text-center py-8">
-                No transactions yet. <Link href="/form" className="text-blue-600 hover:text-blue-800">Add your first transaction</Link> to get started.
-              </p>
+              {recentTransactions.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">
+                  No transactions yet. <Link href="/form" className="text-blue-600 hover:text-blue-800">Add your first transaction</Link> to get started.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {recentTransactions.map((transaction) => (
+                    <div key={transaction._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-shrink-0">
+                            <div className={`w-3 h-3 rounded-full ${transaction.isSuspicious ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {transaction.originator_name} → {transaction.beneficiary_name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {transaction.beneficiary_country} • {new Date(transaction.transaction_date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-900">
+                            ${transaction.amount_usd ? transaction.amount_usd.toLocaleString() : 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {transaction.currency_code}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            transaction.isSuspicious 
+                              ? 'bg-red-100 text-red-800' 
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {transaction.isSuspicious ? 'Suspicious' : 'Normal'}
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Score: {transaction.risk_score || 0}
+                          </p>
+                        </div>
+                        <Link 
+                          href={`/dashboard/${transaction._id}`}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          View →
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
             </>
