@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { TransactionDatabase } from '../lib/aml-engine';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
 export default function Dashboard() {
@@ -10,18 +9,45 @@ export default function Dashboard() {
   const [countryData, setCountryData] = useState([]);
   const [keywordData, setKeywordData] = useState([]);
   const [timeSeriesData, setTimeSeriesData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const db = new TransactionDatabase();
-    const allTransactions = db.getAllTransactions();
-    setTransactions(allTransactions);
-    setStats(db.getTransactionStats());
+    const fetchData = async () => {
+      try {
+        // Fetch transactions
+        const transactionsResponse = await fetch('/api/transactions/list');
+        const transactionsResult = await transactionsResponse.json();
+        
+        if (transactionsResult.success) {
+          setTransactions(transactionsResult.transactions);
+          processChartData(transactionsResult.transactions);
+        }
 
-    // Process data for charts
-    processChartData(allTransactions);
+        // Fetch stats
+        const statsResponse = await fetch('/api/stats');
+        const statsResult = await statsResponse.json();
+        
+        if (statsResult.success) {
+          setStats(statsResult.stats);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const processChartData = (transactions) => {
+    if (!transactions || !Array.isArray(transactions)) {
+      setCountryData([]);
+      setKeywordData([]);
+      setTimeSeriesData([]);
+      return;
+    }
+
     // Country risk analysis
     const countryCounts = {};
     const suspiciousByCountry = {};
@@ -116,8 +142,15 @@ export default function Dashboard() {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-lg text-gray-600">Loading dashboard...</span>
+            </div>
+          ) : (
+            <>
+              {/* Overview Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white p-6 rounded-lg shadow">
               <div className="flex items-center">
                 <div className="p-2 bg-blue-100 rounded-lg">
@@ -338,6 +371,8 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+            </>
+          )}
         </main>
       </div>
     </>

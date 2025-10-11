@@ -1,18 +1,35 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { TransactionDatabase } from '../../lib/aml-engine';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function TransactionDashboard({ transactionId }) {
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const db = new TransactionDatabase();
-    const foundTransaction = db.getTransactionById(transactionId);
-    setTransaction(foundTransaction);
-    setLoading(false);
+    const fetchTransaction = async () => {
+      try {
+        const response = await fetch(`/api/transactions/${transactionId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          setTransaction(result.transaction);
+        } else {
+          setError(result.error || 'Transaction not found');
+        }
+      } catch (error) {
+        console.error('Error fetching transaction:', error);
+        setError('Failed to load transaction');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (transactionId) {
+      fetchTransaction();
+    }
   }, [transactionId]);
 
   if (loading) {
@@ -26,11 +43,12 @@ export default function TransactionDashboard({ transactionId }) {
     );
   }
 
-  if (!transaction) {
+  if (!transaction && !loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Transaction Not Found</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
           <Link href="/transactions" className="text-blue-600 hover:text-blue-800">
             ← Back to Transactions
           </Link>

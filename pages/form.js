@@ -1,18 +1,21 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useState } from 'react';
-import { ExchangeRateAPI, RiskScoringEngine, TransactionDatabase } from '../lib/aml-engine';
+import { useState, useEffect, useRef } from 'react';
+import { ExchangeRateAPI, RiskScoringEngine } from '../lib/aml-engine-client';
 
 export default function TransactionForm() {
   const [formData, setFormData] = useState({
     transaction_date: '',
+    account_id: '',
     originator_name: '',
     originator_address1: '',
     originator_address2: '',
+    originator_address3: '',
     originator_country: '',
     beneficiary_name: '',
     beneficiary_address1: '',
     beneficiary_address2: '',
+    beneficiary_address3: '',
     beneficiary_country: '',
     transaction_amount: '',
     currency_code: 'USD',
@@ -26,7 +29,6 @@ export default function TransactionForm() {
 
   const exchangeAPI = new ExchangeRateAPI('4299650994279511afe6ed48');
   const riskEngine = new RiskScoringEngine();
-  const db = new TransactionDatabase();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -68,10 +70,22 @@ export default function TransactionForm() {
         isSuspicious: riskResult.isSuspicious
       };
 
-      // Save to database
-      const savedTransaction = db.addTransaction(transaction);
+      // Save to database via API
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transaction),
+      });
 
-      setResult(savedTransaction);
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save transaction');
+      }
+
+      setResult(result.transaction);
     } catch (err) {
       setError('Error processing transaction: ' + err.message);
     } finally {
@@ -79,8 +93,144 @@ export default function TransactionForm() {
     }
   };
 
-  const currencies = ['USD', 'EUR', 'GBP', 'INR', 'CNY', 'JPY', 'AED', 'BRL'];
-  const countries = ['US', 'GB', 'DE', 'FR', 'CA', 'AU', 'IN', 'CN', 'JP', 'AE', 'BR', 'MX', 'RU', 'IR', 'KP', 'SY', 'CU'];
+  const currencies = [
+    { code: 'USD', name: 'US Dollar' },
+    { code: 'EUR', name: 'Euro' },
+    { code: 'GBP', name: 'British Pound' },
+    { code: 'INR', name: 'Indian Rupee' },
+    { code: 'CNY', name: 'Chinese Yuan' },
+    { code: 'JPY', name: 'Japanese Yen' },
+    { code: 'AED', name: 'UAE Dirham' },
+    { code: 'BRL', name: 'Brazilian Real' },
+    { code: 'CAD', name: 'Canadian Dollar' },
+    { code: 'AUD', name: 'Australian Dollar' },
+    { code: 'CHF', name: 'Swiss Franc' },
+    { code: 'SGD', name: 'Singapore Dollar' },
+    { code: 'HKD', name: 'Hong Kong Dollar' },
+    { code: 'SEK', name: 'Swedish Krona' },
+    { code: 'NOK', name: 'Norwegian Krone' },
+    { code: 'DKK', name: 'Danish Krone' },
+    { code: 'PLN', name: 'Polish Zloty' },
+    { code: 'CZK', name: 'Czech Koruna' },
+    { code: 'HUF', name: 'Hungarian Forint' },
+    { code: 'RUB', name: 'Russian Ruble' }
+  ];
+
+  const countries = [
+    { code: 'US', name: 'United States' },
+    { code: 'GB', name: 'United Kingdom' },
+    { code: 'DE', name: 'Germany' },
+    { code: 'FR', name: 'France' },
+    { code: 'CA', name: 'Canada' },
+    { code: 'AU', name: 'Australia' },
+    { code: 'IN', name: 'India' },
+    { code: 'CN', name: 'China' },
+    { code: 'JP', name: 'Japan' },
+    { code: 'AE', name: 'United Arab Emirates' },
+    { code: 'BR', name: 'Brazil' },
+    { code: 'MX', name: 'Mexico' },
+    { code: 'RU', name: 'Russia' },
+    { code: 'IR', name: 'Iran' },
+    { code: 'KP', name: 'North Korea' },
+    { code: 'SY', name: 'Syria' },
+    { code: 'CU', name: 'Cuba' },
+    { code: 'IT', name: 'Italy' },
+    { code: 'ES', name: 'Spain' },
+    { code: 'NL', name: 'Netherlands' },
+    { code: 'BE', name: 'Belgium' },
+    { code: 'CH', name: 'Switzerland' },
+    { code: 'AT', name: 'Austria' },
+    { code: 'SE', name: 'Sweden' },
+    { code: 'NO', name: 'Norway' },
+    { code: 'DK', name: 'Denmark' },
+    { code: 'FI', name: 'Finland' },
+    { code: 'PL', name: 'Poland' },
+    { code: 'CZ', name: 'Czech Republic' },
+    { code: 'HU', name: 'Hungary' },
+    { code: 'SG', name: 'Singapore' },
+    { code: 'HK', name: 'Hong Kong' },
+    { code: 'KR', name: 'South Korea' },
+    { code: 'TH', name: 'Thailand' },
+    { code: 'MY', name: 'Malaysia' },
+    { code: 'ID', name: 'Indonesia' },
+    { code: 'PH', name: 'Philippines' },
+    { code: 'VN', name: 'Vietnam' },
+    { code: 'ZA', name: 'South Africa' },
+    { code: 'EG', name: 'Egypt' },
+    { code: 'NG', name: 'Nigeria' },
+    { code: 'KE', name: 'Kenya' },
+    { code: 'AR', name: 'Argentina' },
+    { code: 'CL', name: 'Chile' },
+    { code: 'CO', name: 'Colombia' },
+    { code: 'PE', name: 'Peru' },
+    { code: 'VE', name: 'Venezuela' }
+  ];
+
+  const [currencySearch, setCurrencySearch] = useState('');
+  const [originatorCountrySearch, setOriginatorCountrySearch] = useState('');
+  const [beneficiaryCountrySearch, setBeneficiaryCountrySearch] = useState('');
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [showOriginatorCountryDropdown, setShowOriginatorCountryDropdown] = useState(false);
+  const [showBeneficiaryCountryDropdown, setShowBeneficiaryCountryDropdown] = useState(false);
+
+  // Refs for dropdowns
+  const currencyDropdownRef = useRef(null);
+  const originatorCountryDropdownRef = useRef(null);
+  const beneficiaryCountryDropdownRef = useRef(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (currencyDropdownRef.current && !currencyDropdownRef.current.contains(event.target)) {
+        setShowCurrencyDropdown(false);
+      }
+      if (originatorCountryDropdownRef.current && !originatorCountryDropdownRef.current.contains(event.target)) {
+        setShowOriginatorCountryDropdown(false);
+      }
+      if (beneficiaryCountryDropdownRef.current && !beneficiaryCountryDropdownRef.current.contains(event.target)) {
+        setShowBeneficiaryCountryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Filter functions
+  const filteredCurrencies = currencies.filter(currency =>
+    currency.code.toLowerCase().includes(currencySearch.toLowerCase()) ||
+    currency.name.toLowerCase().includes(currencySearch.toLowerCase())
+  );
+
+  const filteredOriginatorCountries = countries.filter(country =>
+    country.code.toLowerCase().includes(originatorCountrySearch.toLowerCase()) ||
+    country.name.toLowerCase().includes(originatorCountrySearch.toLowerCase())
+  );
+
+  const filteredBeneficiaryCountries = countries.filter(country =>
+    country.code.toLowerCase().includes(beneficiaryCountrySearch.toLowerCase()) ||
+    country.name.toLowerCase().includes(beneficiaryCountrySearch.toLowerCase())
+  );
+
+  const handleCurrencySelect = (currency) => {
+    setFormData(prev => ({ ...prev, currency_code: currency.code }));
+    setCurrencySearch(currency.code);
+    setShowCurrencyDropdown(false);
+  };
+
+  const handleOriginatorCountrySelect = (country) => {
+    setFormData(prev => ({ ...prev, originator_country: country.code }));
+    setOriginatorCountrySearch(country.code);
+    setShowOriginatorCountryDropdown(false);
+  };
+
+  const handleBeneficiaryCountrySelect = (country) => {
+    setFormData(prev => ({ ...prev, beneficiary_country: country.code }));
+    setBeneficiaryCountrySearch(country.code);
+    setShowBeneficiaryCountryDropdown(false);
+  };
 
   return (
     <>
@@ -108,11 +258,11 @@ export default function TransactionForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Transaction Date & Amount */}
+              {/* Transaction Date, Account ID & Amount */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Transaction Date
+                    Transaction Date *
                   </label>
                   <input
                     type="date"
@@ -125,7 +275,21 @@ export default function TransactionForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Amount
+                    Account ID *
+                  </label>
+                  <input
+                    type="text"
+                    name="account_id"
+                    value={formData.account_id}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="e.g., ACC1234"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Amount *
                   </label>
                   <input
                     type="number"
@@ -137,19 +301,55 @@ export default function TransactionForm() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+              </div>
+
+              {/* Currency & Payment Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency
+                    Currency *
+                  </label>
+                  <div className="relative" ref={currencyDropdownRef}>
+                    <input
+                      type="text"
+                      value={currencySearch}
+                      onChange={(e) => {
+                        setCurrencySearch(e.target.value);
+                        setShowCurrencyDropdown(true);
+                      }}
+                      onFocus={() => setShowCurrencyDropdown(true)}
+                      placeholder="Type currency code (e.g., USD, INR)"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {showCurrencyDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {filteredCurrencies.map(currency => (
+                          <div
+                            key={currency.code}
+                            onClick={() => handleCurrencySelect(currency)}
+                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                          >
+                            <span className="font-medium">{currency.code}</span> - {currency.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payment Type
                   </label>
                   <select
-                    name="currency_code"
-                    value={formData.currency_code}
+                    name="payment_type"
+                    value={formData.payment_type}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {currencies.map(currency => (
-                      <option key={currency} value={currency}>{currency}</option>
-                    ))}
+                    <option value="transfer">Transfer</option>
+                    <option value="wire">Wire</option>
+                    <option value="ach">ACH</option>
+                    <option value="check">Check</option>
                   </select>
                 </div>
               </div>
@@ -160,7 +360,7 @@ export default function TransactionForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Name
+                      Name *
                     </label>
                     <input
                       type="text"
@@ -173,30 +373,45 @@ export default function TransactionForm() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
+                      Country *
                     </label>
-                    <select
-                      name="originator_country"
-                      value={formData.originator_country}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select Country</option>
-                      {countries.map(country => (
-                        <option key={country} value={country}>{country}</option>
-                      ))}
-                    </select>
+                    <div className="relative" ref={originatorCountryDropdownRef}>
+                      <input
+                        type="text"
+                        value={originatorCountrySearch}
+                        onChange={(e) => {
+                          setOriginatorCountrySearch(e.target.value);
+                          setShowOriginatorCountryDropdown(true);
+                        }}
+                        onFocus={() => setShowOriginatorCountryDropdown(true)}
+                        placeholder="Type country code (e.g., US, IN)"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {showOriginatorCountryDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredOriginatorCountries.map(country => (
+                            <div
+                              key={country.code}
+                              onClick={() => handleOriginatorCountrySelect(country)}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                              <span className="font-medium">{country.code}</span> - {country.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 1
+                      Address Line 1 *
                     </label>
                     <input
                       type="text"
                       name="originator_address1"
                       value={formData.originator_address1}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -212,6 +427,18 @@ export default function TransactionForm() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Address Line 3
+                    </label>
+                    <input
+                      type="text"
+                      name="originator_address3"
+                      value={formData.originator_address3}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -221,7 +448,7 @@ export default function TransactionForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Name
+                      Name *
                     </label>
                     <input
                       type="text"
@@ -234,30 +461,45 @@ export default function TransactionForm() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
+                      Country *
                     </label>
-                    <select
-                      name="beneficiary_country"
-                      value={formData.beneficiary_country}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select Country</option>
-                      {countries.map(country => (
-                        <option key={country} value={country}>{country}</option>
-                      ))}
-                    </select>
+                    <div className="relative" ref={beneficiaryCountryDropdownRef}>
+                      <input
+                        type="text"
+                        value={beneficiaryCountrySearch}
+                        onChange={(e) => {
+                          setBeneficiaryCountrySearch(e.target.value);
+                          setShowBeneficiaryCountryDropdown(true);
+                        }}
+                        onFocus={() => setShowBeneficiaryCountryDropdown(true)}
+                        placeholder="Type country code (e.g., US, IN)"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {showBeneficiaryCountryDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredBeneficiaryCountries.map(country => (
+                            <div
+                              key={country.code}
+                              onClick={() => handleBeneficiaryCountrySelect(country)}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                              <span className="font-medium">{country.code}</span> - {country.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 1
+                      Address Line 1 *
                     </label>
                     <input
                       type="text"
                       name="beneficiary_address1"
                       value={formData.beneficiary_address1}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -273,41 +515,36 @@ export default function TransactionForm() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Address Line 3
+                    </label>
+                    <input
+                      type="text"
+                      name="beneficiary_address3"
+                      value={formData.beneficiary_address3}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Payment Information */}
               <div className="border-t pt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Payment Instruction
-                    </label>
-                    <textarea
-                      name="payment_instruction"
-                      value={formData.payment_instruction}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Payment Type
-                    </label>
-                    <select
-                      name="payment_type"
-                      value={formData.payment_type}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="transfer">Transfer</option>
-                      <option value="wire">Wire</option>
-                      <option value="ach">ACH</option>
-                      <option value="check">Check</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payment Instruction *
+                  </label>
+                  <textarea
+                    name="payment_instruction"
+                    value={formData.payment_instruction}
+                    onChange={handleInputChange}
+                    required
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               </div>
 
@@ -352,12 +589,12 @@ export default function TransactionForm() {
                     <div>
                       <p className="text-sm text-gray-600">Amount (USD)</p>
                       <p className="text-lg font-semibold text-gray-900">
-                        ${result.amount_usd.toLocaleString()}
+                        ${result.amount_usd ? result.amount_usd.toLocaleString() : 'N/A'}
                       </p>
                     </div>
                   </div>
 
-                  {result.triggered_rules.length > 0 && (
+                  {result.triggered_rules && result.triggered_rules.length > 0 && (
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-2">Triggered Rules:</p>
                       <ul className="space-y-2">

@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { TransactionDatabase } from '../lib/aml-engine';
+// Remove the TransactionDatabase import since we'll use API calls
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
@@ -14,11 +14,35 @@ export default function Transactions() {
   const [stats, setStats] = useState({ total: 0, suspicious: 0, normal: 0 });
 
   useEffect(() => {
-    const db = new TransactionDatabase();
-    const allTransactions = db.getAllTransactions();
-    setTransactions(allTransactions);
-    setFilteredTransactions(allTransactions);
-    setStats(db.getTransactionStats());
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('/api/transactions/list');
+        const result = await response.json();
+        
+        if (result.success) {
+          setTransactions(result.transactions);
+          setFilteredTransactions(result.transactions);
+        }
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
+    };
+
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        const result = await response.json();
+        
+        if (result.success) {
+          setStats(result.stats);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchTransactions();
+    fetchStats();
   }, []);
 
   useEffect(() => {
@@ -261,7 +285,7 @@ export default function Transactions() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredTransactions.map((transaction) => (
-                      <tr key={transaction.id} className="hover:bg-gray-50">
+                      <tr key={transaction._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
                             <div className="text-sm font-medium text-gray-900">
@@ -304,7 +328,7 @@ export default function Transactions() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <Link
-                            href={`/dashboard/${transaction.id}`}
+                            href={`/dashboard/${transaction._id}`}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             View Details

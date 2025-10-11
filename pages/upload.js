@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 import Papa from 'papaparse';
-import { ExchangeRateAPI, RiskScoringEngine, TransactionDatabase } from '../lib/aml-engine';
+import { ExchangeRateAPI, RiskScoringEngine, TransactionDatabase } from '../lib/aml-engine-client';
 
 export default function CSVUpload() {
   const [file, setFile] = useState(null);
@@ -69,6 +69,7 @@ export default function CSVUpload() {
     try {
       Papa.parse(file, {
         header: true,
+        skipEmptyLines: true,
         complete: async (results) => {
           if (results.errors.length > 0) {
             setError('CSV parsing errors: ' + results.errors.map(e => e.message).join(', '));
@@ -77,7 +78,8 @@ export default function CSVUpload() {
           }
 
           const transactions = results.data.filter(row => 
-            row.transaction_amount && row.currency_code && row.transaction_date
+            row.transaction_amount && row.currency_code && row.transaction_date &&
+            Object.keys(row).length > 1 // Ensure row has more than just empty fields
           );
 
           if (transactions.length === 0) {
