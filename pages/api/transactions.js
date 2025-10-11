@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { appendTransactionToCSV } from '../../utils/csvUpdater';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_DB = process.env.MONGODB_DB || 'aml_monitoring';
@@ -140,9 +141,20 @@ export default async function handler(req, res) {
     const transaction = formatTransactionForDB(req.body);
     const result = await collection.insertOne(transaction);
     
+    const savedTransaction = { ...transaction, _id: result.insertedId };
+    
+    // Append transaction to CSV file
+    try {
+      await appendTransactionToCSV(savedTransaction);
+      console.log('Transaction appended to CSV successfully');
+    } catch (csvError) {
+      console.error('Error appending to CSV:', csvError);
+      // Don't fail the request if CSV update fails
+    }
+    
     res.status(201).json({ 
       success: true, 
-      transaction: { ...transaction, _id: result.insertedId }
+      transaction: savedTransaction
     });
   } catch (error) {
     console.error('Error saving transaction:', error);

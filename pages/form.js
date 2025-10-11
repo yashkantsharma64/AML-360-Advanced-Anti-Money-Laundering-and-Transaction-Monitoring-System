@@ -12,11 +12,13 @@ export default function TransactionForm() {
     originator_address1: '',
     originator_address2: '',
     originator_address3: '',
+    originator_pincode: '',
     originator_country: '',
     beneficiary_name: '',
     beneficiary_address1: '',
     beneficiary_address2: '',
     beneficiary_address3: '',
+    beneficiary_pincode: '',
     beneficiary_country: '',
     transaction_amount: '',
     currency_code: 'USD',
@@ -27,9 +29,39 @@ export default function TransactionForm() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [pincodeLoading, setPincodeLoading] = useState({ originator: false, beneficiary: false });
 
   const exchangeAPI = new ExchangeRateAPI('4299650994279511afe6ed48');
   const riskEngine = new RiskScoringEngine();
+
+  const lookupCountryFromPincode = async (pincode, type) => {
+    if (!pincode || pincode.length < 3) return;
+    
+    setPincodeLoading(prev => ({ ...prev, [type]: true }));
+    
+    try {
+      const response = await fetch('/api/pincode-to-country', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pincode }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setFormData(prev => ({
+          ...prev,
+          [`${type}_country`]: result.country
+        }));
+      }
+    } catch (error) {
+      console.error('Error looking up country from pincode:', error);
+    } finally {
+      setPincodeLoading(prev => ({ ...prev, [type]: false }));
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +69,13 @@ export default function TransactionForm() {
       ...prev,
       [name]: value
     }));
+
+    // Auto-lookup country when pincode is entered
+    if (name === 'originator_pincode' && value.length >= 3) {
+      lookupCountryFromPincode(value, 'originator');
+    } else if (name === 'beneficiary_pincode' && value.length >= 3) {
+      lookupCountryFromPincode(value, 'beneficiary');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -447,7 +486,7 @@ export default function TransactionForm() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Address Line 3
                     </label>
                     <input
@@ -455,8 +494,67 @@ export default function TransactionForm() {
                       name="originator_address3"
                       value={formData.originator_address3}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Pincode {!formData.originator_country && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="originator_pincode"
+                        value={formData.originator_pincode}
+                        onChange={handleInputChange}
+                        placeholder="Enter pincode/postal code"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        required={!formData.originator_country}
+                      />
+                      {pincodeLoading.originator && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formData.originator_country ? `Country: ${formData.originator_country}` : 'Country will be auto-detected from pincode'}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Country {!formData.originator_pincode && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="relative" ref={originatorCountryDropdownRef}>
+                      <input
+                        type="text"
+                        value={originatorCountrySearch}
+                        onChange={(e) => {
+                          setOriginatorCountrySearch(e.target.value);
+                          setShowOriginatorCountryDropdown(true);
+                        }}
+                        onFocus={() => setShowOriginatorCountryDropdown(true)}
+                        placeholder="Type country code (e.g., US, IN)"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        required={!formData.originator_pincode}
+                      />
+                      {showOriginatorCountryDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredOriginatorCountries.map(country => (
+                            <div
+                              key={country.code}
+                              onClick={() => handleOriginatorCountrySelect(country)}
+                              className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-gray-900 dark:text-white"
+                            >
+                              <span className="font-medium">{country.code}</span> - {country.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formData.originator_pincode ? 'Optional - country can be detected from pincode' : 'Required if no pincode provided'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -479,8 +577,8 @@ export default function TransactionForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country *
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Country {!formData.beneficiary_pincode && <span className="text-red-500">*</span>}
                     </label>
                     <div className="relative" ref={beneficiaryCountryDropdownRef}>
                       <input
@@ -492,15 +590,16 @@ export default function TransactionForm() {
                         }}
                         onFocus={() => setShowBeneficiaryCountryDropdown(true)}
                         placeholder="Type country code (e.g., US, IN)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        required={!formData.beneficiary_pincode}
                       />
                       {showBeneficiaryCountryDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
                           {filteredBeneficiaryCountries.map(country => (
                             <div
                               key={country.code}
                               onClick={() => handleBeneficiaryCountrySelect(country)}
-                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                              className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-gray-900 dark:text-white"
                             >
                               <span className="font-medium">{country.code}</span> - {country.name}
                             </div>
@@ -508,6 +607,9 @@ export default function TransactionForm() {
                         </div>
                       )}
                     </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formData.beneficiary_pincode ? 'Optional - country can be detected from pincode' : 'Required if no pincode provided'}
+                    </p>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -535,7 +637,7 @@ export default function TransactionForm() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Address Line 3
                     </label>
                     <input
@@ -543,8 +645,32 @@ export default function TransactionForm() {
                       name="beneficiary_address3"
                       value={formData.beneficiary_address3}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Pincode {!formData.beneficiary_country && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="beneficiary_pincode"
+                        value={formData.beneficiary_pincode}
+                        onChange={handleInputChange}
+                        placeholder="Enter pincode/postal code"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        required={!formData.beneficiary_country}
+                      />
+                      {pincodeLoading.beneficiary && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formData.beneficiary_country ? `Country: ${formData.beneficiary_country}` : 'Country will be auto-detected from pincode'}
+                    </p>
                   </div>
                 </div>
               </div>
