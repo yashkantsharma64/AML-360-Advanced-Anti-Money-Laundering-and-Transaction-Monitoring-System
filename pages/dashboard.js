@@ -13,6 +13,19 @@ export default function Dashboard() {
   const [timeSeriesData, setTimeSeriesData] = useState([]);
   const [timePeriod, setTimePeriod] = useState('days'); // 'days', 'months', 'years'
   const [loading, setLoading] = useState(true);
+  
+  // Download functionality state
+  const [downloadFilters, setDownloadFilters] = useState({
+    country: 'all',
+    year: 'all',
+    format: 'csv'
+  });
+  const [availableFilters, setAvailableFilters] = useState({
+    countries: [],
+    years: [],
+    totalTransactions: 0
+  });
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +65,14 @@ export default function Dashboard() {
         if (transactionsResult.success) {
           setTransactions(transactionsResult.transactions);
           processChartData(transactionsResult.transactions);
+        }
+
+        // Fetch download filters
+        const filtersResponse = await fetch('/api/dataset-filters');
+        const filtersResult = await filtersResponse.json();
+        
+        if (filtersResult.success) {
+          setAvailableFilters(filtersResult.data);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -179,6 +200,52 @@ export default function Dashboard() {
     setTimeSeriesData(timeSeriesData);
   };
 
+  // Download functionality
+  const handleDownload = async () => {
+    setDownloadLoading(true);
+    try {
+      const params = new URLSearchParams({
+        country: downloadFilters.country,
+        year: downloadFilters.year,
+        format: downloadFilters.format
+      });
+
+      const response = await fetch(`/api/download-dataset?${params}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Download failed');
+      }
+
+      // Get filename from response headers or create one
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'aml_dataset';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Download failed: ${error.message}`);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
   const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
 
   return (
@@ -217,6 +284,117 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
+              {/* Download Dataset Section */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 p-6 mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Download Dataset</h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Export transaction data filtered by country and year</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Total Records: {availableFilters.totalTransactions.toLocaleString()}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  {/* Country Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Filter by Country
+                    </label>
+                    <select
+                      value={downloadFilters.country}
+                      onChange={(e) => setDownloadFilters(prev => ({ ...prev, country: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="all">All Countries</option>
+                      {availableFilters.countries.map(country => (
+                        <option key={country.code} value={country.code}>
+                          {country.name} ({country.count.toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Year Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Filter by Year
+                    </label>
+                    <select
+                      value={downloadFilters.year}
+                      onChange={(e) => setDownloadFilters(prev => ({ ...prev, year: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="all">All Years</option>
+                      {availableFilters.years.map(year => (
+                        <option key={year.year} value={year.year}>
+                          {year.year} ({year.count.toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Format Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Format
+                    </label>
+                    <select
+                      value={downloadFilters.format}
+                      onChange={(e) => setDownloadFilters(prev => ({ ...prev, format: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="csv">CSV</option>
+                      <option value="json">JSON</option>
+                    </select>
+                  </div>
+
+                  {/* Download Button */}
+                  <div className="flex items-end">
+                    <button
+                      onClick={handleDownload}
+                      disabled={downloadLoading}
+                      className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {downloadLoading ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Download
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter Summary */}
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  {downloadFilters.country !== 'all' && (
+                    <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded mr-2">
+                      Country: {availableFilters.countries.find(c => c.code === downloadFilters.country)?.name || downloadFilters.country}
+                    </span>
+                  )}
+                  {downloadFilters.year !== 'all' && (
+                    <span className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded mr-2">
+                      Year: {downloadFilters.year}
+                    </span>
+                  )}
+                  <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded">
+                    Format: {downloadFilters.format.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
               {/* Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-700">
