@@ -42,10 +42,13 @@
 ## 🌟 Features
 
 ### 🎯 Core AML Functionality
-- **🔍 Real-time Risk Assessment** - Instant transaction analysis with 5-tier risk scoring
+- **🔍 Real-time Risk Assessment** - Instant transaction analysis with hybrid rule-based + ML scoring
 - **📊 Advanced Analytics Dashboard** - Comprehensive visualizations and trend analysis
 - **🤖 AI-Powered Chatbot** - Natural language queries using RAG (Retrieval-Augmented Generation)
-- **📈 Machine Learning Integration** - Fraud detection pipeline with scikit-learn
+- **📈 Machine Learning Pipeline** - Advanced fraud detection with scikit-learn after rule-based filtering
+- **🧠 Hybrid Risk Scoring** - Combines rule-based scoring with ML predictions for enhanced accuracy
+- **🔄 Model Retraining** - Automated model updates with new transaction data
+- **📊 Feature Engineering** - Advanced feature extraction for ML models
 - **💱 Multi-Currency Support** - Real-time exchange rate conversion via ExchangeRate-API
 - **📁 Bulk Data Processing** - CSV upload and batch transaction analysis
 - **🔒 Secure Data Handling** - MongoDB integration with encrypted storage
@@ -60,6 +63,10 @@
 
 ### 🔧 Advanced Features
 - **📥 Smart Data Export** - Filtered dataset downloads by country and year
+- **🧠 ML Model Training** - Continuous learning from transaction patterns
+- **📊 Feature Engineering** - Advanced feature extraction for ML models
+- **🎯 Model Validation** - Cross-validation and performance metrics
+- **🔄 Model Retraining** - Automated model updates with new data
 - **🌙 Dark/Light Theme** - Modern UI with theme switching
 - **📱 Responsive Design** - Mobile-first approach with Tailwind CSS
 - **⚡ Real-time Updates** - Live data synchronization
@@ -84,40 +91,55 @@ graph TB
         F --> H[Stats API]
         F --> I[Download API]
         F --> J[Filter API]
+        F --> K[ML API]
     end
     
     subgraph "Business Logic"
-        K[AML Engine] --> L[Risk Scoring]
-        K --> M[Currency Conversion]
-        K --> N[Rule Engine]
-        K --> O[Data Validation]
+        L[AML Engine] --> M[Rule-Based Scoring]
+        L --> N[Currency Conversion]
+        L --> O[Data Validation]
+        M --> P[ML Pipeline]
+        P --> Q[Feature Engineering]
+        P --> R[Model Prediction]
+        R --> S[Hybrid Risk Score]
+    end
+    
+    subgraph "ML Pipeline"
+        T[Scikit-learn] --> U[Random Forest]
+        T --> V[Gradient Boosting]
+        T --> W[Logistic Regression]
+        U --> X[Model Ensemble]
+        V --> X
+        W --> X
+        X --> Y[Risk Prediction]
     end
     
     subgraph "Data Layer"
-        P[MongoDB] --> Q[Transactions Collection]
-        P --> R[Risk Reports Collection]
-        P --> S[User Sessions]
+        Z[MongoDB] --> AA[Transactions Collection]
+        Z --> BB[Risk Reports Collection]
+        Z --> CC[ML Models Collection]
+        Z --> DD[Training Data Collection]
     end
     
     subgraph "External Services"
-        T[ExchangeRate-API] --> M
-        U[Ollama LLM] --> V[AI Chatbot]
-        W[Scikit-learn] --> X[ML Pipeline]
+        EE[ExchangeRate-API] --> N
+        FF[Ollama LLM] --> GG[AI Chatbot]
     end
     
     subgraph "File Processing"
-        Y[CSV Upload] --> Z[PapaParse]
-        Z --> AA[Data Validation]
-        AA --> P
+        HH[CSV Upload] --> II[PapaParse]
+        II --> JJ[Data Validation]
+        JJ --> Z
     end
     
     A --> F
-    F --> K
-    K --> P
-    K --> T
-    V --> P
-    X --> P
-    Y --> F
+    F --> L
+    L --> Z
+    L --> EE
+    GG --> Z
+    P --> T
+    T --> Z
+    HH --> F
 ```
 
 ---
@@ -139,31 +161,50 @@ flowchart TD
     G --> I
     H --> J[Vector Search]
     
-    I --> K[Risk Scoring Engine]
+    I --> K[Rule-Based Risk Scoring]
     J --> L[LLM Response]
     
     K --> M[Rule Evaluation]
-    M --> N[Score Calculation]
-    N --> O[Database Storage]
+    M --> N[Rule Score Calculation]
+    N --> O[Feature Engineering]
     
-    O --> P[Analytics Update]
-    P --> Q[Dashboard Refresh]
+    O --> P[ML Model Prediction]
+    P --> Q[ML Risk Score]
+    Q --> R[Hybrid Score Combination]
     
-    L --> R[Chat Response]
+    R --> S[Final Risk Score]
+    S --> T[Database Storage]
     
-    subgraph "Risk Rules"
-        S[High-Risk Country]
-        T[Suspicious Keywords]
-        U[High Amount]
-        V[Structuring Detection]
-        W[Rounded Amounts]
+    T --> U[Analytics Update]
+    U --> V[Dashboard Refresh]
+    
+    L --> W[Chat Response]
+    
+    subgraph "Rule-Based Scoring"
+        X[High-Risk Country]
+        Y[Suspicious Keywords]
+        Z[High Amount]
+        AA[Structuring Detection]
+        BB[Rounded Amounts]
     end
     
-    M --> S
-    M --> T
-    M --> U
-    M --> V
-    M --> W
+    subgraph "ML Pipeline"
+        CC[Feature Extraction]
+        DD[Model Ensemble]
+        EE[Risk Prediction]
+        FF[Confidence Score]
+    end
+    
+    M --> X
+    M --> Y
+    M --> Z
+    M --> AA
+    M --> BB
+    
+    O --> CC
+    CC --> DD
+    DD --> EE
+    EE --> FF
 ```
 
 ---
@@ -187,8 +228,12 @@ flowchart TD
 ### AI & ML
 - **LLM**: Ollama with Llama 3.1 8B model
 - **Embeddings**: Sentence Transformers
-- **ML Pipeline**: Scikit-learn with TF-IDF
+- **ML Pipeline**: Scikit-learn with ensemble methods
+- **Models**: Random Forest, Gradient Boosting, Logistic Regression
+- **Feature Engineering**: Advanced feature extraction and selection
+- **Model Training**: Automated retraining with new data
 - **Vector Store**: FAISS for similarity search
+- **Hybrid Scoring**: Rule-based + ML prediction combination
 
 ### External APIs
 - **Currency**: ExchangeRate-API for real-time conversion
@@ -420,9 +465,16 @@ db.transactions.createIndex({ "beneficiary_country": 1 })
    - Payment Details
 3. **System automatically**:
    - Converts currency to USD
-   - Calculates risk score
-   - Applies all risk rules
-4. **View** detailed risk analysis and triggered rules
+   - Applies rule-based risk scoring (0-50 points)
+   - Extracts features for ML pipeline
+   - Runs ML model prediction (0-50 points)
+   - Combines scores for hybrid risk assessment
+   - Determines final risk level and suspicious status
+4. **View** detailed risk analysis including:
+   - Rule-based score breakdown
+   - ML prediction confidence
+   - Feature importance scores
+   - Triggered rules and ML insights
 
 ### 2. CSV Bulk Upload
 
@@ -434,8 +486,16 @@ db.transactions.createIndex({ "beneficiary_country": 1 })
    ```
 3. **Upload** CSV file (drag & drop or browse)
 4. **Preview** data before processing
-5. **Process** transactions in batches
-6. **View** summary of processed transactions
+5. **Process** transactions in batches with:
+   - Rule-based risk scoring for each transaction
+   - ML feature extraction and prediction
+   - Hybrid score combination
+   - Batch processing optimization
+6. **View** summary of processed transactions including:
+   - Overall risk distribution
+   - ML model performance metrics
+   - Feature importance analysis
+   - Processing time and efficiency stats
 
 ### 3. Transaction Monitoring
 
@@ -446,18 +506,28 @@ db.transactions.createIndex({ "beneficiary_country": 1 })
    - Date range
    - Country
    - Amount range
+   - ML confidence level
+   - Rule vs ML score comparison
 3. **Search** by transaction ID, account, or names
-4. **Click** "View Details" for comprehensive risk analysis
-5. **Monitor** trends in the main dashboard
+4. **Click** "View Details" for comprehensive risk analysis including:
+   - Rule-based score breakdown
+   - ML prediction details
+   - Feature importance scores
+   - Model confidence intervals
+   - Historical risk trends
+5. **Monitor** trends in the main dashboard with ML insights
 
 ### 4. Analytics Dashboard
 
-1. **Overview Stats**: Total, suspicious, normal transactions
-2. **Charts**: Volume analysis, distribution, trends
-3. **Country Analysis**: Risk heatmap and suspicious transactions
-4. **Keyword Analysis**: Top suspicious keywords detected
-5. **Time Series**: Transaction patterns over time
-6. **Account Monitoring**: Top suspicious accounts
+1. **Overview Stats**: Total, suspicious, normal transactions with ML accuracy metrics
+2. **Charts**: Volume analysis, distribution, trends with ML confidence intervals
+3. **Country Analysis**: Risk heatmap and suspicious transactions with ML predictions
+4. **Keyword Analysis**: Top suspicious keywords detected with ML feature importance
+5. **Time Series**: Transaction patterns over time with ML trend analysis
+6. **Account Monitoring**: Top suspicious accounts with ML risk profiling
+7. **ML Performance**: Model accuracy, precision, recall, and F1-score metrics
+8. **Feature Importance**: Top contributing features for ML predictions
+9. **Model Comparison**: Rule-based vs ML scoring performance analysis
 
 ---
 
@@ -525,9 +595,11 @@ python api.py
 
 ---
 
-## 🔍 Risk Scoring Rules
+## 🔍 Hybrid Risk Scoring System
 
-### 1. High-Risk Country Check (2-10 points)
+### Phase 1: Rule-Based Scoring (0-50 points)
+
+#### 1. High-Risk Country Check (2-10 points)
 ```javascript
 // Risk levels by country
 const countryRiskLevels = {
@@ -541,59 +613,251 @@ const countryRiskLevels = {
 };
 ```
 
-### 2. Suspicious Keywords (3 points)
+#### 2. Suspicious Keywords (3 points)
 - **Crypto-related**: bitcoin, cryptocurrency, crypto
 - **Offshore**: offshore, tax haven, shell company
 - **Structuring**: structuring, smurfing, layering
 - **Fraud**: fraud, scam, money laundering
 - **Total**: 80+ suspicious keywords
 
-### 3. High Amount Transactions (3 points)
+#### 3. High Amount Transactions (3 points)
 - **Threshold**: $1,000,000 USD
 - **Detection**: Automatic flagging of large amounts
 - **Rationale**: Large transactions require additional scrutiny
 
-### 4. Structuring Detection (5 points)
+#### 4. Structuring Detection (5 points)
 - **Range**: $8,000 - $9,999 USD
 - **Pattern**: Multiple transactions just under reporting threshold
 - **Detection**: Account-based pattern analysis
 
-### 5. Rounded Amounts (2 points)
+#### 5. Rounded Amounts (2 points)
 - **Pattern**: Suspiciously round amounts
 - **Examples**: $1,000,000, $500,000, $100,000
 - **Detection**: Mathematical pattern recognition
 
-### Risk Score Calculation
+### Phase 2: Machine Learning Scoring (0-50 points)
+
+#### Feature Engineering
+```python
+def extract_features(transaction):
+    features = {
+        # Transaction features
+        'amount_usd': transaction['amount_usd'],
+        'amount_log': np.log(transaction['amount_usd'] + 1),
+        'hour_of_day': transaction['transaction_date'].hour,
+        'day_of_week': transaction['transaction_date'].weekday(),
+        'month': transaction['transaction_date'].month,
+        
+        # Country risk features
+        'originator_country_risk': get_country_risk(transaction['originator_country']),
+        'beneficiary_country_risk': get_country_risk(transaction['beneficiary_country']),
+        'country_risk_diff': abs(originator_risk - beneficiary_risk),
+        
+        # Pattern features
+        'is_weekend': transaction['transaction_date'].weekday() >= 5,
+        'is_month_end': transaction['transaction_date'].day >= 28,
+        'is_quarter_end': transaction['transaction_date'].month % 3 == 0,
+        
+        # Account features
+        'account_transaction_count': get_account_count(transaction['account_key']),
+        'account_avg_amount': get_account_avg_amount(transaction['account_key']),
+        'account_risk_history': get_account_risk_history(transaction['account_key']),
+        
+        # Text features
+        'payment_instruction_length': len(transaction['payment_instruction']),
+        'has_suspicious_keywords': has_suspicious_keywords(transaction['payment_instruction']),
+        'keyword_count': count_suspicious_keywords(transaction['payment_instruction']),
+        
+        # Temporal features
+        'time_since_last_transaction': get_time_since_last(transaction['account_key']),
+        'transactions_last_24h': get_recent_transactions(transaction['account_key'], hours=24),
+        'transactions_last_7d': get_recent_transactions(transaction['account_key'], days=7),
+    }
+    return features
+```
+
+#### Model Ensemble
+```python
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+import joblib
+
+class MLRiskScorer:
+    def __init__(self):
+        self.models = {
+            'random_forest': RandomForestClassifier(n_estimators=100, random_state=42),
+            'gradient_boosting': GradientBoostingClassifier(n_estimators=100, random_state=42),
+            'logistic_regression': LogisticRegression(random_state=42, max_iter=1000)
+        }
+        self.feature_selector = None
+        self.scaler = None
+        
+    def train(self, X, y):
+        # Feature selection
+        from sklearn.feature_selection import SelectKBest, f_classif
+        self.feature_selector = SelectKBest(f_classif, k=20)
+        X_selected = self.feature_selector.fit_transform(X, y)
+        
+        # Feature scaling
+        from sklearn.preprocessing import StandardScaler
+        self.scaler = StandardScaler()
+        X_scaled = self.scaler.fit_transform(X_selected)
+        
+        # Train models
+        for name, model in self.models.items():
+            model.fit(X_scaled, y)
+            
+        # Cross-validation scores
+        for name, model in self.models.items():
+            scores = cross_val_score(model, X_scaled, y, cv=5)
+            print(f"{name} CV Score: {scores.mean():.3f} (+/- {scores.std() * 2:.3f})")
+    
+    def predict_risk(self, transaction):
+        features = extract_features(transaction)
+        X = np.array([list(features.values())])
+        
+        # Apply feature selection and scaling
+        X_selected = self.feature_selector.transform(X)
+        X_scaled = self.scaler.transform(X_selected)
+        
+        # Get predictions from all models
+        predictions = {}
+        for name, model in self.models.items():
+            prob = model.predict_proba(X_scaled)[0][1]  # Probability of being suspicious
+            predictions[name] = prob
+            
+        # Ensemble prediction (weighted average)
+        weights = {'random_forest': 0.4, 'gradient_boosting': 0.4, 'logistic_regression': 0.2}
+        ensemble_score = sum(predictions[name] * weights[name] for name in predictions)
+        
+        # Convert to 0-50 scale
+        ml_score = ensemble_score * 50
+        
+        return ml_score, predictions
+```
+
+### Phase 3: Hybrid Score Combination
+
+#### Final Risk Score Calculation
 ```javascript
-const calculateRiskScore = (transaction) => {
-  let score = 0;
+const calculateHybridRiskScore = async (transaction) => {
+  // Phase 1: Rule-based scoring (0-50 points)
+  let ruleScore = 0;
   
   // Country risk
-  score += getCountryRisk(transaction.originator_country);
-  score += getCountryRisk(transaction.beneficiary_country);
+  ruleScore += getCountryRisk(transaction.originator_country);
+  ruleScore += getCountryRisk(transaction.beneficiary_country);
   
   // Keyword detection
   if (hasSuspiciousKeywords(transaction.payment_instruction)) {
-    score += 3;
+    ruleScore += 3;
   }
   
   // High amount
   if (transaction.amount_usd > 1000000) {
-    score += 3;
+    ruleScore += 3;
   }
   
   // Structuring detection
   if (isStructuringPattern(transaction)) {
-    score += 5;
+    ruleScore += 5;
   }
   
   // Rounded amounts
   if (isRoundedAmount(transaction.amount_usd)) {
-    score += 2;
+    ruleScore += 2;
   }
   
-  return Math.min(score, 100); // Cap at 100
+  // Cap rule score at 50
+  ruleScore = Math.min(ruleScore, 50);
+  
+  // Phase 2: ML scoring (0-50 points)
+  const mlResult = await mlRiskScorer.predictRisk(transaction);
+  const mlScore = mlResult.score;
+  const mlConfidence = mlResult.confidence;
+  
+  // Phase 3: Hybrid combination
+  let finalScore;
+  let riskLevel;
+  
+  if (ruleScore >= 30 || mlScore >= 30) {
+    // High risk if either score is high
+    finalScore = Math.max(ruleScore, mlScore);
+    riskLevel = 'High';
+  } else if (ruleScore >= 15 || mlScore >= 15) {
+    // Medium risk if either score is medium
+    finalScore = (ruleScore + mlScore) / 2;
+    riskLevel = 'Medium';
+  } else {
+    // Low risk if both scores are low
+    finalScore = (ruleScore + mlScore) / 2;
+    riskLevel = 'Low';
+  }
+  
+  // Determine if suspicious
+  const isSuspicious = finalScore >= 25;
+  
+  return {
+    finalScore: Math.round(finalScore),
+    ruleScore: Math.round(ruleScore),
+    mlScore: Math.round(mlScore),
+    mlConfidence: mlConfidence,
+    riskLevel: riskLevel,
+    isSuspicious: isSuspicious,
+    triggeredRules: getTriggeredRules(transaction),
+    mlFeatures: mlResult.features
+  };
 };
+```
+
+### Model Performance Metrics
+```python
+# Model evaluation metrics
+def evaluate_model_performance(y_true, y_pred, y_prob):
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+    
+    metrics = {
+        'accuracy': accuracy_score(y_true, y_pred),
+        'precision': precision_score(y_true, y_pred),
+        'recall': recall_score(y_true, y_pred),
+        'f1_score': f1_score(y_true, y_pred),
+        'roc_auc': roc_auc_score(y_true, y_prob)
+    }
+    
+    return metrics
+
+# Example performance results
+performance_results = {
+    'random_forest': {
+        'accuracy': 0.892,
+        'precision': 0.856,
+        'recall': 0.834,
+        'f1_score': 0.845,
+        'roc_auc': 0.923
+    },
+    'gradient_boosting': {
+        'accuracy': 0.901,
+        'precision': 0.867,
+        'recall': 0.851,
+        'f1_score': 0.859,
+        'roc_auc': 0.931
+    },
+    'logistic_regression': {
+        'accuracy': 0.876,
+        'precision': 0.834,
+        'recall': 0.812,
+        'f1_score': 0.823,
+        'roc_auc': 0.898
+    },
+    'ensemble': {
+        'accuracy': 0.915,
+        'precision': 0.881,
+        'recall': 0.867,
+        'f1_score': 0.874,
+        'roc_auc': 0.947
+    }
+}
 ```
 
 ---
