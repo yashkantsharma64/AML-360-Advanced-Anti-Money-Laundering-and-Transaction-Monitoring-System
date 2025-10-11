@@ -70,7 +70,6 @@
 - **🌙 Dark/Light Theme** - Modern UI with theme switching
 - **📱 Responsive Design** - Mobile-first approach with Tailwind CSS
 - **⚡ Real-time Updates** - Live data synchronization
-- **🔐 Role-based Access** - Secure user management
 - **📊 Performance Monitoring** - System health and performance metrics
 
 ---
@@ -105,7 +104,7 @@ graph TB
     end
     
     subgraph "ML Pipeline"
-        T[Scikit-learn] --> U[Random Forest]
+        T[Scikit-learn] --> U[Logistic Regression]
         T --> V[Gradient Boosting]
         T --> W[Logistic Regression]
         U --> X[Model Ensemble]
@@ -222,14 +221,13 @@ flowchart TD
 ### Backend
 - **Runtime**: Node.js with Next.js API Routes
 - **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT-based security
 - **File Storage**: Local filesystem with MongoDB metadata
 
 ### AI & ML
 - **LLM**: Ollama with Llama 3.1 8B model
 - **Embeddings**: Sentence Transformers
 - **ML Pipeline**: Scikit-learn with ensemble methods
-- **Models**: Random Forest, Gradient Boosting, Logistic Regression
+- **Models**: Logistic Regression
 - **Feature Engineering**: Advanced feature extraction and selection
 - **Model Training**: Automated retraining with new data
 - **Vector Store**: FAISS for similarity search
@@ -405,13 +403,6 @@ EXCHANGE_RATE_API_KEY=your_api_key_here
 OLLAMA_MODEL=llama3.1:8b
 OLLAMA_BASE_URL=http://localhost:11434
 
-# Application Settings
-NEXTAUTH_SECRET=your_secret_here
-NEXTAUTH_URL=http://localhost:3000
-
-# Optional: External Services
-SENTRY_DSN=your_sentry_dsn
-ANALYTICS_ID=your_analytics_id
 ```
 
 ### MongoDB Configuration
@@ -1192,9 +1183,6 @@ MONGO_INITDB_ROOT_PASSWORD=password
 # Exchange Rate API
 EXCHANGE_RATE_API_KEY=your_api_key_here
 
-# Application
-NEXTAUTH_SECRET=your_secret_here
-NEXTAUTH_URL=http://localhost:3000
 ```
 
 ---
