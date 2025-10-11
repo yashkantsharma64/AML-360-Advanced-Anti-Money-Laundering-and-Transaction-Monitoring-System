@@ -51,9 +51,18 @@ export default function TransactionForm() {
         formData.currency_code,
         formData.transaction_date
       );
+      
+      console.log('Form submission debug:', {
+        originalAmount: formData.transaction_amount,
+        parsedAmount: parseFloat(formData.transaction_amount),
+        currency: formData.currency_code,
+        date: formData.transaction_date,
+        amountUsd: amountUsd,
+        amountUsdType: typeof amountUsd
+      });
 
       // Calculate risk score
-      const riskResult = riskEngine.calculateRiskScore({
+      const riskResult = await riskEngine.calculateRiskScore({
         ...formData,
         transaction_amount: parseFloat(formData.transaction_amount),
         amount_usd: amountUsd

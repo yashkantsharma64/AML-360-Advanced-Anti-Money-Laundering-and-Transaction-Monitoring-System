@@ -58,10 +58,44 @@ export default async function handler(req, res) {
       { $limit: 10 }
     ]).toArray();
     
+    // Top suspicious accounts
+    const topSuspiciousAccounts = await collection.aggregate([
+      { $match: { isSuspicious: true } },
+      { $group: { 
+        _id: '$account_id', 
+        count: { $sum: 1 },
+        totalAmount: { $sum: '$amount_usd' },
+        avgAmount: { $avg: '$amount_usd' }
+      } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]).toArray();
+
+    // Top suspicious keywords - extract keywords from payment_instruction
     const topKeywords = await collection.aggregate([
-      { $unwind: '$triggered_rules' },
-      { $match: { 'triggered_rules.rule': 'Suspicious keyword' } },
-      { $group: { _id: '$triggered_rules.details', count: { $sum: 1 } } },
+      { $match: { 
+        isSuspicious: true,
+        payment_instruction: { $ne: null, $ne: '' }
+      } },
+      { $project: { 
+        keywords: { 
+          $split: [
+            { $toLower: '$payment_instruction' }, 
+            ' '
+          ] 
+        } 
+      } },
+      { $unwind: '$keywords' },
+      { $match: { 
+        keywords: { 
+          $in: [
+            'gift', 'donation', 'loan', 'cash', 'payment', 'urgent', 'confidential', 
+            'offshore', 'crypto', 'bitcoin', 'consulting', 'commission', 'fee',
+            'miscellaneous', 'personal', 'family', 'support', 'investment', 'safekeeping'
+          ] 
+        } 
+      } },
+      { $group: { _id: '$keywords', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
     ]).toArray();
@@ -75,6 +109,7 @@ export default async function handler(req, res) {
         suspiciousRate: total > 0 ? (suspicious / total * 100).toFixed(2) : 0,
         avgAmount: Math.round(avgAmount),
         topCountries,
+        topSuspiciousAccounts,
         topKeywords
       }
     });

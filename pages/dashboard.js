@@ -8,7 +8,9 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [countryData, setCountryData] = useState([]);
   const [keywordData, setKeywordData] = useState([]);
+  const [suspiciousAccountsData, setSuspiciousAccountsData] = useState([]);
   const [timeSeriesData, setTimeSeriesData] = useState([]);
+  const [timePeriod, setTimePeriod] = useState('days'); // 'days', 'months', 'years'
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +22,26 @@ export default function Dashboard() {
         
         if (statsResult.success) {
           setStats(statsResult.stats);
+          
+          // Process suspicious accounts data
+          if (statsResult.stats.topSuspiciousAccounts) {
+            const accountsData = statsResult.stats.topSuspiciousAccounts.map(account => ({
+              account_id: account._id,
+              count: account.count,
+              totalAmount: Math.round(account.totalAmount),
+              avgAmount: Math.round(account.avgAmount)
+            }));
+            setSuspiciousAccountsData(accountsData);
+          }
+          
+          // Process keywords data
+          if (statsResult.stats.topKeywords) {
+            const keywordsData = statsResult.stats.topKeywords.map(keyword => ({
+              keyword: keyword._id,
+              count: keyword.count
+            }));
+            setKeywordData(keywordsData);
+          }
         }
 
         // Fetch transactions
@@ -39,6 +61,13 @@ export default function Dashboard() {
 
     fetchData();
   }, []);
+
+  // Reprocess time series data when time period changes
+  useEffect(() => {
+    if (transactions.length > 0) {
+      processChartData(transactions);
+    }
+  }, [timePeriod, transactions]);
 
   const processChartData = (transactions) => {
     if (!transactions || !Array.isArray(transactions)) {
@@ -77,9 +106,11 @@ export default function Dashboard() {
     transactions.forEach(t => {
       if (t.triggered_rules) {
         t.triggered_rules.forEach(rule => {
-          if (rule.rule === 'Suspicious keyword') {
+          if (rule.rule === 'Suspicious keyword' && rule.details) {
             const keyword = rule.details.replace('Found keyword: "', '').replace('"', '');
-            keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+            if (keyword && keyword !== rule.details) { // Ensure replacement worked
+              keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+            }
           }
         });
       }
@@ -92,22 +123,57 @@ export default function Dashboard() {
 
     setKeywordData(keywordData);
 
-    // Time series analysis
-    const dailyData = {};
+    // Time series analysis based on selected period
+    const timeData = {};
     transactions.forEach(t => {
-      const date = new Date(t.transaction_date).toISOString().split('T')[0];
-      if (!dailyData[date]) {
-        dailyData[date] = { date, total: 0, suspicious: 0 };
+      const transactionDate = new Date(t.transaction_date);
+      let periodKey;
+      
+      if (timePeriod === 'days') {
+        periodKey = transactionDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      } else if (timePeriod === 'months') {
+        periodKey = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
+      } else if (timePeriod === 'years') {
+        periodKey = transactionDate.getFullYear().toString(); // YYYY
       }
-      dailyData[date].total += 1;
+      
+      if (!timeData[periodKey]) {
+        timeData[periodKey] = { 
+          period: periodKey, 
+          total: 0, 
+          suspicious: 0,
+          normal: 0,
+          suspiciousRate: 0
+        };
+      }
+      
+      timeData[periodKey].total += 1;
       if (t.isSuspicious) {
-        dailyData[date].suspicious += 1;
+        timeData[periodKey].suspicious += 1;
+      } else {
+        timeData[periodKey].normal += 1;
       }
     });
 
-    const timeSeriesData = Object.values(dailyData)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-30); // Last 30 days
+    // Calculate suspicious rates and format data
+    const processedTimeData = Object.values(timeData).map(item => ({
+      ...item,
+      suspiciousRate: item.total > 0 ? ((item.suspicious / item.total) * 100).toFixed(1) : 0
+    }));
+
+    // Sort by period and limit based on time period
+    let limit;
+    if (timePeriod === 'days') {
+      limit = 30; // Last 30 days
+    } else if (timePeriod === 'months') {
+      limit = 12; // Last 12 months
+    } else {
+      limit = 5; // Last 5 years
+    }
+
+    const timeSeriesData = processedTimeData
+      .sort((a, b) => a.period.localeCompare(b.period))
+      .slice(-limit);
 
     setTimeSeriesData(timeSeriesData);
   };
@@ -262,6 +328,62 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Top Suspicious Accounts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900">Top 5 Suspicious Accounts</h2>
+              </div>
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={suspiciousAccountsData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="account_id" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        name === 'count' ? `${value} transactions` : `$${value.toLocaleString()}`,
+                        name === 'count' ? 'Suspicious Transactions' : 'Total Amount'
+                      ]}
+                    />
+                    <Bar dataKey="count" fill="#EF4444" name="count" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900">Account Details</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {suspiciousAccountsData.length > 0 ? (
+                    suspiciousAccountsData.map((account, index) => (
+                      <div key={account.account_id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900">#{index + 1} {account.account_id}</p>
+                          <p className="text-sm text-gray-600">{account.count} suspicious transactions</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-red-600">${account.totalAmount.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500">Avg: ${account.avgAmount.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center py-8">No suspicious accounts found</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Country Risk Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="bg-white rounded-lg shadow">
@@ -308,23 +430,111 @@ export default function Dashboard() {
           {/* Time Series Analysis */}
           <div className="bg-white rounded-lg shadow mb-8">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Transaction Trends Over Time</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-medium text-gray-900">Transaction Trends Over Time</h2>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setTimePeriod('days')}
+                    className={`px-3 py-1 text-sm rounded-md ${
+                      timePeriod === 'days' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Days
+                  </button>
+                  <button
+                    onClick={() => setTimePeriod('months')}
+                    className={`px-3 py-1 text-sm rounded-md ${
+                      timePeriod === 'months' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Months
+                  </button>
+                  <button
+                    onClick={() => setTimePeriod('years')}
+                    className={`px-3 py-1 text-sm rounded-md ${
+                      timePeriod === 'years' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    Years
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="p-6">
               {timeSeriesData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={timeSeriesData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="total" stroke="#3B82F6" strokeWidth={2} name="Total Transactions" />
-                    <Line type="monotone" dataKey="suspicious" stroke="#EF4444" strokeWidth={2} name="Suspicious Transactions" />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <LineChart data={timeSeriesData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="period" 
+                        angle={timePeriod === 'days' ? -45 : 0}
+                        textAnchor={timePeriod === 'days' ? 'end' : 'middle'}
+                        height={timePeriod === 'days' ? 80 : 60}
+                      />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          typeof value === 'number' ? value.toLocaleString() : value,
+                          name === 'total' ? 'Total Transactions' :
+                          name === 'suspicious' ? 'Suspicious Transactions' :
+                          name === 'normal' ? 'Normal Transactions' :
+                          name === 'suspiciousRate' ? 'Suspicious Rate (%)' : name
+                        ]}
+                        labelFormatter={(label) => {
+                          if (timePeriod === 'days') {
+                            return new Date(label).toLocaleDateString();
+                          } else if (timePeriod === 'months') {
+                            const [year, month] = label.split('-');
+                            return new Date(year, month - 1).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                          } else {
+                            return `Year ${label}`;
+                          }
+                        }}
+                      />
+                      <Line type="monotone" dataKey="total" stroke="#3B82F6" strokeWidth={2} name="total" />
+                      <Line type="monotone" dataKey="suspicious" stroke="#EF4444" strokeWidth={2} name="suspicious" />
+                      <Line type="monotone" dataKey="normal" stroke="#10B981" strokeWidth={2} name="normal" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  
+                  {/* Summary Stats */}
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600">Total Periods</p>
+                      <p className="text-2xl font-semibold text-gray-900">{timeSeriesData.length}</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600">Total Transactions</p>
+                      <p className="text-2xl font-semibold text-blue-600">
+                        {timeSeriesData.reduce((sum, item) => sum + item.total, 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600">Suspicious Transactions</p>
+                      <p className="text-2xl font-semibold text-red-600">
+                        {timeSeriesData.reduce((sum, item) => sum + item.suspicious, 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600">Avg Suspicious Rate</p>
+                      <p className="text-2xl font-semibold text-yellow-600">
+                        {timeSeriesData.length > 0 
+                          ? (timeSeriesData.reduce((sum, item) => sum + parseFloat(item.suspiciousRate), 0) / timeSeriesData.length).toFixed(1)
+                          : 0}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No time series data available</p>
+                  <p className="text-gray-500">No time series data available for the selected period</p>
                 </div>
               )}
             </div>
