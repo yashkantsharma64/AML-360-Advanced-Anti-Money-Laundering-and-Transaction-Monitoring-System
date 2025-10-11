@@ -1,12 +1,19 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import Papa from 'papaparse';
+import ThemeToggle from '../../components/ThemeToggle';
 
 export default function TransactionDashboard({ transactionId }) {
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState(false);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const contentRef = useRef(null);
 
   useEffect(() => {
     const fetchTransaction = async () => {
@@ -40,12 +47,26 @@ export default function TransactionDashboard({ transactionId }) {
     }
   }, [transactionId]);
 
+  // Close download menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDownloadMenu && !event.target.closest('.download-menu')) {
+        setShowDownloadMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDownloadMenu]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading transaction details...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading transaction details...</p>
         </div>
       </div>
     );
@@ -53,11 +74,11 @@ export default function TransactionDashboard({ transactionId }) {
 
   if (!transaction && !loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Transaction Not Found</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Link href="/transactions" className="text-blue-600 hover:text-blue-800">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Transaction Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+          <Link href="/transactions" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
             ← Back to Transactions
           </Link>
         </div>
@@ -78,22 +99,189 @@ export default function TransactionDashboard({ transactionId }) {
 
   const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
 
+  // Download functions
+  const downloadPDF = async () => {
+    if (!contentRef.current) return;
+    
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Zoom in by reducing the image width (making it appear larger)
+      const imgWidth = 160; // Reduced from 210 for zoom effect
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const fileName = `transaction-analysis-${transaction.transaction_id || transactionId}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const downloadCSV = () => {
+    if (!transaction) return;
+    
+    try {
+      // Prepare transaction data for CSV
+      const csvData = {
+        'Transaction ID': transaction.transaction_id || 'N/A',
+        'Account ID': transaction.account_id || 'N/A',
+        'Transaction Date': transaction.transaction_date || 'N/A',
+        'Originator Name': transaction.originator_name || 'N/A',
+        'Originator Country': transaction.originator_country || 'N/A',
+        'Beneficiary Name': transaction.beneficiary_name || 'N/A',
+        'Beneficiary Country': transaction.beneficiary_country || 'N/A',
+        'Amount': transaction.transaction_amount || 'N/A',
+        'Currency': transaction.currency_code || 'N/A',
+        'Amount USD': transaction.amount_usd || 'N/A',
+        'Exchange Rate': transaction.usd_rate || 'N/A',
+        'Payment Type': transaction.payment_type || 'N/A',
+        'Payment Instruction': transaction.payment_instruction || 'N/A',
+        'Risk Score': transaction.risk_score || 0,
+        'Risk Level': transaction.risk_report?.risk_level || 'N/A',
+        'Suspicious': transaction.isSuspicious ? 'Yes' : 'No',
+        'Triggered Rules Count': transaction.triggered_rules?.length || 0,
+        'Created At': transaction.created_at || 'N/A',
+        'Updated At': transaction.updated_at || 'N/A'
+      };
+
+      // Add triggered rules details
+      if (transaction.triggered_rules && transaction.triggered_rules.length > 0) {
+        transaction.triggered_rules.forEach((rule, index) => {
+          csvData[`Rule ${index + 1}`] = `${rule.rule} (${rule.score} points) - ${rule.details}`;
+        });
+      }
+
+      // Add risk report details
+      if (transaction.risk_report) {
+        csvData['Investigation Required'] = transaction.risk_report.investigation_required ? 'Yes' : 'No';
+        csvData['Priority'] = transaction.risk_report.priority || 'N/A';
+        csvData['Recommendations'] = transaction.risk_report.recommendations?.join('; ') || 'N/A';
+      }
+
+      const csv = Papa.unparse([csvData]);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `transaction-analysis-${transaction.transaction_id || transactionId}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      alert('Error generating CSV. Please try again.');
+    }
+  };
+
   return (
     <>
       <Head>
         <title>Transaction Dashboard - AML Monitoring</title>
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-6">
               <div>
-                <Link href="/transactions" className="text-blue-600 hover:text-blue-800">← Back to Transactions</Link>
-                <h1 className="text-3xl font-bold text-gray-900 mt-2">Transaction Analysis</h1>
+                <Link href="/transactions" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">← Back to Transactions</Link>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">Transaction Analysis</h1>
               </div>
               <div className="flex items-center space-x-4">
+                <ThemeToggle />
+                {/* Download Dropdown */}
+                <div className="relative download-menu">
+                  <button
+                    onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                    disabled={downloading}
+                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
+                      downloading 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                    }`}
+                  >
+                    {downloading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                  
+                  {showDownloadMenu && !downloading && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                      <button
+                        onClick={() => {
+                          downloadPDF();
+                          setShowDownloadMenu(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <svg className="w-4 h-4 mr-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download as PDF
+                      </button>
+                      <button
+                        onClick={() => {
+                          downloadCSV();
+                          setShowDownloadMenu(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <svg className="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download as CSV
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${
                   transaction.isSuspicious 
                     ? 'bg-red-100 text-red-800' 
@@ -109,7 +297,7 @@ export default function TransactionDashboard({ transactionId }) {
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main ref={contentRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Transaction Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Transaction Details */}

@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ total: 0, suspicious: 0, normal: 0, suspiciousRate: 0 });
@@ -44,8 +45,8 @@ export default function Dashboard() {
           }
         }
 
-        // Fetch transactions
-        const transactionsResponse = await fetch('/api/transactions/list');
+        // Fetch ALL transactions for charts
+        const transactionsResponse = await fetch('/api/transactions/all');
         const transactionsResult = await transactionsResponse.json();
         
         if (transactionsResult.success) {
@@ -186,20 +187,21 @@ export default function Dashboard() {
         <title>Dashboard - AML Monitoring</title>
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-6">
               <div>
-                <Link href="/" className="text-blue-600 hover:text-blue-800">← Back to Home</Link>
-                <h1 className="text-3xl font-bold text-gray-900 mt-2">AML Dashboard</h1>
+                <Link href="/" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">← Back to Home</Link>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">AML Dashboard</h1>
               </div>
               <div className="flex space-x-4">
-                <Link href="/transactions" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <ThemeToggle />
+                <Link href="/transactions" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   View Transactions
                 </Link>
-                <Link href="/form" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                <Link href="/form" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
                   Add Transaction
                 </Link>
               </div>
@@ -211,67 +213,67 @@ export default function Dashboard() {
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-lg text-gray-600">Loading dashboard...</span>
+              <span className="ml-3 text-lg text-gray-600 dark:text-gray-300">Loading dashboard...</span>
             </div>
           ) : (
             <>
               {/* Overview Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-700">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                      <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Transactions</p>
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.total}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-700">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                      <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Suspicious</p>
+                      <p className="text-2xl font-semibold text-red-600 dark:text-red-400">{stats.suspicious}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Suspicious</p>
-                  <p className="text-2xl font-semibold text-red-600">{stats.suspicious}</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-700">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                      <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Normal</p>
+                      <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{stats.normal}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Normal</p>
-                  <p className="text-2xl font-semibold text-green-600">{stats.normal}</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-700">
+                  <div className="flex items-center">
+                    <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                      <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Suspicious Rate</p>
+                      <p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{stats.suspiciousRate}%</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Suspicious Rate</p>
-                  <p className="text-2xl font-semibold text-yellow-600">{stats.suspiciousRate}%</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Charts Grid */}
@@ -506,27 +508,31 @@ export default function Dashboard() {
                   
                   {/* Summary Stats */}
                   <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm text-gray-600">Total Periods</p>
-                      <p className="text-2xl font-semibold text-gray-900">{timeSeriesData.length}</p>
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Total Periods</p>
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-white">{timeSeriesData.length}</p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm text-gray-600">Total Transactions</p>
-                      <p className="text-2xl font-semibold text-blue-600">
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Total Transactions</p>
+                      <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">
                         {timeSeriesData.reduce((sum, item) => sum + item.total, 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm text-gray-600">Suspicious Transactions</p>
-                      <p className="text-2xl font-semibold text-red-600">
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Suspicious Transactions</p>
+                      <p className="text-2xl font-semibold text-red-600 dark:text-red-400">
                         {timeSeriesData.reduce((sum, item) => sum + item.suspicious, 0).toLocaleString()}
                       </p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm text-gray-600">Avg Suspicious Rate</p>
-                      <p className="text-2xl font-semibold text-yellow-600">
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Avg Suspicious Rate</p>
+                      <p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">
                         {timeSeriesData.length > 0 
-                          ? (timeSeriesData.reduce((sum, item) => sum + parseFloat(item.suspiciousRate), 0) / timeSeriesData.length).toFixed(1)
+                          ? (() => {
+                              const totalTransactions = timeSeriesData.reduce((sum, item) => sum + item.total, 0);
+                              const totalSuspicious = timeSeriesData.reduce((sum, item) => sum + item.suspicious, 0);
+                              return totalTransactions > 0 ? ((totalSuspicious / totalTransactions) * 100).toFixed(1) : 0;
+                            })()
                           : 0}%
                       </p>
                     </div>
