@@ -320,7 +320,7 @@ export default function TransactionForm() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Transaction Date *
+                      Transaction Date <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
@@ -333,7 +333,7 @@ export default function TransactionForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Account ID *
+                      Account ID <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -347,7 +347,7 @@ export default function TransactionForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Amount *
+                      Amount <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -365,7 +365,7 @@ export default function TransactionForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency *
+                      Currency <span className="text-red-500">*</span>
                   </label>
                   <div className="relative" ref={currencyDropdownRef}>
                     <input
@@ -416,9 +416,9 @@ export default function TransactionForm() {
               <div className="border-t pt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Originator Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Name *
+                      Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -429,40 +429,9 @@ export default function TransactionForm() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country *
-                    </label>
-                    <div className="relative" ref={originatorCountryDropdownRef}>
-                      <input
-                        type="text"
-                        value={originatorCountrySearch}
-                        onChange={(e) => {
-                          setOriginatorCountrySearch(e.target.value);
-                          setShowOriginatorCountryDropdown(true);
-                        }}
-                        onFocus={() => setShowOriginatorCountryDropdown(true)}
-                        placeholder="Type country code (e.g., US, IN)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      {showOriginatorCountryDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                          {filteredOriginatorCountries.map(country => (
-                            <div
-                              key={country.code}
-                              onClick={() => handleOriginatorCountrySelect(country)}
-                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                            >
-                              <span className="font-medium">{country.code}</span> - {country.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 1 *
+                      Address Line 1 <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -563,9 +532,9 @@ export default function TransactionForm() {
               <div className="border-t pt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Beneficiary Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Name *
+                      Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -576,44 +545,9 @@ export default function TransactionForm() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Country {!formData.beneficiary_pincode && <span className="text-red-500">*</span>}
-                    </label>
-                    <div className="relative" ref={beneficiaryCountryDropdownRef}>
-                      <input
-                        type="text"
-                        value={beneficiaryCountrySearch}
-                        onChange={(e) => {
-                          setBeneficiaryCountrySearch(e.target.value);
-                          setShowBeneficiaryCountryDropdown(true);
-                        }}
-                        onFocus={() => setShowBeneficiaryCountryDropdown(true)}
-                        placeholder="Type country code (e.g., US, IN)"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        required={!formData.beneficiary_pincode}
-                      />
-                      {showBeneficiaryCountryDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                          {filteredBeneficiaryCountries.map(country => (
-                            <div
-                              key={country.code}
-                              onClick={() => handleBeneficiaryCountrySelect(country)}
-                              className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-gray-900 dark:text-white"
-                            >
-                              <span className="font-medium">{country.code}</span> - {country.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {formData.beneficiary_pincode ? 'Optional - country can be detected from pincode' : 'Required if no pincode provided'}
-                    </p>
-                  </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 1 *
+                      Address Line 1 <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -672,6 +606,41 @@ export default function TransactionForm() {
                       {formData.beneficiary_country ? `Country: ${formData.beneficiary_country}` : 'Country will be auto-detected from pincode'}
                     </p>
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Country {!formData.beneficiary_pincode && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="relative" ref={beneficiaryCountryDropdownRef}>
+                      <input
+                        type="text"
+                        value={beneficiaryCountrySearch}
+                        onChange={(e) => {
+                          setBeneficiaryCountrySearch(e.target.value);
+                          setShowBeneficiaryCountryDropdown(true);
+                        }}
+                        onFocus={() => setShowBeneficiaryCountryDropdown(true)}
+                        placeholder="Type country code (e.g., US, IN)"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        required={!formData.beneficiary_pincode}
+                      />
+                      {showBeneficiaryCountryDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredBeneficiaryCountries.map(country => (
+                            <div
+                              key={country.code}
+                              onClick={() => handleBeneficiaryCountrySelect(country)}
+                              className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-gray-900 dark:text-white"
+                            >
+                              <span className="font-medium">{country.code}</span> - {country.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formData.beneficiary_pincode ? 'Optional - country can be detected from pincode' : 'Required if no pincode provided'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -680,7 +649,7 @@ export default function TransactionForm() {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Payment Instruction *
+                      Payment Instruction <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="payment_instruction"
