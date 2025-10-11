@@ -14,6 +14,14 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch stats first
+        const statsResponse = await fetch('/api/stats');
+        const statsResult = await statsResponse.json();
+        
+        if (statsResult.success) {
+          setStats(statsResult.stats);
+        }
+
         // Fetch transactions
         const transactionsResponse = await fetch('/api/transactions/list');
         const transactionsResult = await transactionsResponse.json();
@@ -21,14 +29,6 @@ export default function Dashboard() {
         if (transactionsResult.success) {
           setTransactions(transactionsResult.transactions);
           processChartData(transactionsResult.transactions);
-        }
-
-        // Fetch stats
-        const statsResponse = await fetch('/api/stats');
-        const statsResult = await statsResponse.json();
-        
-        if (statsResult.success) {
-          setStats(statsResult.stats);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
