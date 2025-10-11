@@ -108,6 +108,8 @@ export default function AmlTransactionForm() {
     }
   };
 
+  
+
   const handleFilePicked = (file) => {
     if (!file) return;
     Papa.parse(file, {
@@ -152,6 +154,8 @@ export default function AmlTransactionForm() {
     const file = e.target.files?.[0];
     handleFilePicked(file);
   };
+
+  
 
   const onDrop = (e) => {
     e.preventDefault();
