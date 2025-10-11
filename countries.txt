@@ -1,0 +1,217 @@
+Country                             Risk Level
+----------------------------------- ----------
+Albania                             Low
+Algeria                             Medium
+American Samoa                      na.
+Andorra                             na.
+Angola                              High
+Antigua and Barbuda                 Medium
+Argentina                           Medium
+Armenia                             Medium
+Aruba                               na.
+Australia                           Very Low
+Austria                             Very Low
+Azerbaijan                          Low
+Bahrain                             Medium
+Bangladesh                          High
+Barbados                            Medium
+Belarus                             Medium
+Belgium                             Low
+Belize                              Medium
+Benin                               High
+Bermuda                             na.
+Bhutan                              Medium
+Bolivia                             High
+Bosnia and Herzegovina              Medium
+Botswana                            Low
+Brazil                              Medium
+British Virgin Islands              na.
+Brunei Darussalam                   Low
+Bulgaria                            Low
+Burkina Faso                        High
+Burundi                             High
+Cambodia                            Medium
+Cameroon                            High
+Canada                              Low
+Cape Verde                          High
+Cayman Islands                      na.
+Central African Republic            High
+Chad                                High
+Chile                               Low
+China                               Low
+Colombia                            Medium
+Comoros                             High
+Costa Rica                          Low
+Cote d'Ivoire                       High
+Croatia                             Low
+Cuba                                na.
+Curacao                             na.
+Cyprus                              Low
+Czech Republic                      Very Low
+Democratic Republic of Congo        High
+Denmark                             Very Low
+Djibouti                            High
+Dominica                            Medium
+Dominican Republic                  Medium
+Ecuador                             Medium
+Egypt                               Very High
+El Salvador                         High
+Equatorial Guinea                   High
+Eritrea                             Very High
+Estonia                             Very Low
+Eswatini                            Medium
+Ethiopia                            High
+Faroe Islands                       na.
+Fiji                                Medium
+Finland                             Very Low
+France                              Low
+Gabon                               Medium
+Georgia                             Low
+Germany                             Very Low
+Ghana                               High
+Gibraltar                           na.
+Greece                              Medium
+Greenland                           na.
+Grenada                             Medium
+Guam                                na.
+Guatemala                           Medium
+Guinea                              High
+Guinea-Bissau                       Very High
+Guyana                              Medium
+Haiti                               High
+Honduras                            Medium
+Hong Kong SAR                       na.
+Hungary                             Low
+Iceland                             Very Low
+India                               Medium
+Indonesia                           Medium
+Iraq                                Medium
+Ireland                             Very Low
+Islamic Republic of Afghanistan     High
+Islamic Republic of Iran            Medium
+Isle of Man                         na.
+Israel                              Very Low
+Italy                               Medium
+Jamaica                             Medium
+Japan                               Very Low
+Jordan                              High
+Kazakhstan                          Low
+Kenya                               High
+Kiribati                            Medium
+Korea                               Very Low
+Kuwait                              Low
+Kyrgyz Republic                     Medium
+Lao People's Democratic Republic    High
+Latvia                              Low
+Lebanon                             Very High
+Lesotho                             High
+Liberia                             High
+Libya                               na.
+Liechtenstein                       na.
+Lithuania                           Low
+Luxembourg                          Very Low
+Macao SAR, China                    na.
+Madagascar                          High
+Malawi                              Very High
+Malaysia                            Low
+Maldives                            High
+Mali                                Very High
+Malta                               Very Low
+Marshall Islands                    Medium
+Mauritania                          High
+Mauritius                           Medium
+Mexico                              Medium
+Micronesia                          Medium
+Moldova                             Medium
+Monaco                              na.
+Mongolia                            Medium
+Montenegro                          Medium
+Morocco                             Medium
+Mozambique                          Very High
+Myanmar                             High
+Namibia                             Medium
+Nauru                               Low
+Nepal                               Medium
+Netherlands                         Very Low
+New Caledonia                       na.
+New Zealand                         Very Low
+Nicaragua                           Medium
+Niger                               High
+Nigeria                             High
+North Korea                         na.
+North Macedonia                     Low
+Northern Mariana Islands            na.
+Norway                              Very Low
+Oman                                Low
+Pakistan                            Very High
+Palau                               Medium
+Palestine                           na.
+Panama                              Medium
+Papua New Guinea                    High
+Paraguay                            Medium
+Peru                                Low
+Philippines                         Medium
+Poland                              Low
+Portugal                            Low
+Puerto Rico                         na.
+Qatar                               Very Low
+Republic of Congo                   High
+Republic of Yemen                   Very High
+Romania                             Medium
+Russia                              High
+Rwanda                              High
+Samoa                               Low
+San Marino                          Very Low
+Sao Tome and Principal              High
+Saudi Arabia                        Low
+Senegal                             High
+Serbia                              Low
+Seychelles                          Low
+Sierra Leone                        High
+Singapore                           Very Low
+Sint Maarten (Dutch part)           na.
+Slovak Republic                     Low
+Slovenia                            Very Low
+Solomon Islands                     Medium
+Somalia                             na.
+South Africa                        High
+South Sudan                         Very High
+Spain                               Low
+Sri Lanka                           High
+St. Kitts and Nevis                 Medium
+St. Lucia                           Medium
+St. Martin (French part)            na.
+St. Vincent and the Grenadines      Medium
+Sudan                               Very High
+Suriname                            High
+Sweden                              Very Low
+Switzerland                         Very Low
+Syrian Arab Republic                High
+Taiwan                              na.
+Tajikistan                          Medium
+Tanzania                            High
+Thailand                            Low
+The Bahamas                         Medium
+The Gambia                          High
+Timor-Leste                         Medium
+Togo                                High
+Tonga                               Medium
+Trinidad and Tobago                 Low
+Tunisia                             High
+Turkey                              Medium
+Turkmenistan                        Medium
+Turks and Caicos Islands            na.
+Tuvalu                              Low
+U.S. Virgin Islands                 na.
+Uganda                              High
+Ukraine                             High
+United Arab Emirates                Very Low
+United Kingdom                      Low
+United States                       Low
+Uruguay                             Low
+Uzbekistan                          Medium
+Vanuatu                             Medium
+Venezuela                           Very High
+Vietnam                             Low
+Zambia                              Very High
+Zimbabwe                            High

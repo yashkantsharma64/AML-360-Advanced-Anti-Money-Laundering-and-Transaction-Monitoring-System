@@ -1,0 +1,217 @@
+Country                             Risk Level
+----------------------------------- ----------
+Albania                             Level_1
+Algeria                             Level_2
+American Samoa                      na.
+Andorra                             na.
+Angola                              Level_3
+Antigua and Barbuda                 Level_2
+Argentina                           Level_2
+Armenia                             Level_2
+Aruba                               na.
+Australia                           Level_1
+Austria                             Level_1
+Azerbaijan                          Level_1
+Bahrain                             Level_2
+Bangladesh                          Level_3
+Barbados                            Level_2
+Belarus                             Level_2
+Belgium                             Level_1
+Belize                              Level_2
+Benin                               Level_3
+Bermuda                             na.
+Bhutan                              Level_2
+Bolivia                             Level_3
+Bosnia and Herzegovina              Level_2
+Botswana                            Level_1
+Brazil                              Level_2
+British Virgin Islands              na.
+Brunei Darussalam                   Level_1
+Bulgaria                            Level_1
+Burkina Faso                        Level_3
+Burundi                             Level_3
+Cambodia                            Level_2
+Cameroon                            Level_3
+Canada                              Level_1
+Cape Verde                          Level_3
+Cayman Islands                      na.
+Central African Republic            Level_3
+Chad                                Level_3
+Chile                               Level_1
+China                               Level_1
+Colombia                            Level_2
+Comoros                             Level_3
+Costa Rica                          Level_1
+Cote d'Ivoire                       Level_3
+Croatia                             Level_1
+Cuba                                Level_3
+Curacao                             na.
+Cyprus                              Level_1
+Czech Republic                      Level_1
+Democratic Republic of Congo        Level_3
+Denmark                             Level_1
+Djibouti                            Level_3
+Dominica                            Level_2
+Dominican Republic                  Level_2
+Ecuador                             Level_2
+Egypt                               Level_3
+El Salvador                         Level_3
+Equatorial Guinea                   Level_3
+Eritrea                             Level_3
+Estonia                             Level_1
+Eswatini                            Level_2
+Ethiopia                            Level_3
+Faroe Islands                       na.
+Fiji                                Level_2
+Finland                             Level_1
+France                              Level_1
+Gabon                               Level_2
+Georgia                             Level_1
+Germany                             Level_1
+Ghana                               Level_3
+Gibraltar                           na.
+Greece                              Level_2
+Greenland                           na.
+Grenada                             Level_2
+Guam                                na.
+Guatemala                           Level_2
+Guinea                              Level_3
+Guinea-Bissau                       Level_3
+Guyana                              Level_2
+Haiti                               Level_3
+Honduras                            Level_2
+Hong Kong SAR                       na.
+Hungary                             Level_1
+Iceland                             Level_1
+India                               Level_2
+Indonesia                           Level_2
+Iraq                                Level_2
+Ireland                             Level_1
+Islamic Republic of Afghanistan     Level_3
+Islamic Republic of Iran            Level_3
+Isle of Man                         na.
+Israel                              Level_1
+Italy                               Level_2
+Jamaica                             Level_2
+Japan                               Level_1
+Jordan                              Level_3
+Kazakhstan                          Level_1
+Kenya                               Level_3
+Kiribati                            Level_2
+Korea                               Level_1
+Kuwait                              Level_1
+Kyrgyz Republic                     Level_2
+Lao People's Democratic Republic    Level_3
+Latvia                              Level_1
+Lebanon                             Level_3
+Lesotho                             Level_3
+Liberia                             Level_3
+Libya                               na.
+Liechtenstein                       na.
+Lithuania                           Level_1
+Luxembourg                          Level_1
+Macao SAR, China                    na.
+Madagascar                          Level_3
+Malawi                              Level_3
+Malaysia                            Level_1
+Maldives                            Level_3
+Mali                                Level_3
+Malta                               Level_1
+Marshall Islands                    Level_2
+Mauritania                          Level_3
+Mauritius                           Level_2
+Mexico                              Level_2
+Micronesia                          Level_2
+Moldova                             Level_2
+Monaco                              na.
+Mongolia                            Level_2
+Montenegro                          Level_2
+Morocco                             Level_2
+Mozambique                          Level_3
+Myanmar                             Level_3
+Namibia                             Level_2
+Nauru                               Level_1
+Nepal                               Level_2
+Netherlands                         Level_1
+New Caledonia                       na.
+New Zealand                         Level_1
+Nicaragua                           Level_2
+Niger                               Level_3
+Nigeria                             Level_3
+North Korea                         Level_3
+North Macedonia                     Level_1
+Northern Mariana Islands            na.
+Norway                              Level_1
+Oman                                Level_1
+Pakistan                            Level_3
+Palau                               Level_2
+Palestine                           na.
+Panama                              Level_2
+Papua New Guinea                    Level_3
+Paraguay                            Level_2
+Peru                                Level_1
+Philippines                         Level_2
+Poland                              Level_1
+Portugal                            Level_1
+Puerto Rico                         na.
+Qatar                               Level_1
+Republic of Congo                   Level_3
+Republic of Yemen                   Level_3
+Romania                             Level_2
+Russia                              na.
+Rwanda                              Level_3
+Samoa                               Level_1
+San Marino                          Level_1
+Sao Tome and Principal              Level_3
+Saudi Arabia                        Level_1
+Senegal                             Level_3
+Serbia                              Level_1
+Seychelles                          Level_1
+Sierra Leone                        Level_3
+Singapore                           Level_1
+Sint Maarten (Dutch part)           na.
+Slovak Republic                     Level_1
+Slovenia                            Level_1
+Solomon Islands                     Level_2
+Somalia                             na.
+South Africa                        Level_2
+South Sudan                         Level_3
+Spain                               Level_1
+Sri Lanka                           Level_3
+St. Kitts and Nevis                 Level_2
+St. Lucia                           Level_2
+St. Martin (French part)            na.
+St. Vincent and the Grenadines      Level_2
+Sudan                               Level_3
+Suriname                            Level_3
+Sweden                              Level_1
+Switzerland                         Level_1
+Syrian Arab Republic                Level_3
+Taiwan                              na.
+Tajikistan                          Level_2
+Tanzania                            Level_3
+Thailand                            Level_1
+The Bahamas                         Level_2
+The Gambia                          Level_3
+Timor-Leste                         Level_2
+Togo                                Level_3
+Tonga                               Level_2
+Trinidad and Tobago                 Level_1
+Tunisia                             Level_3
+Turkey                              Level_2
+Turkmenistan                        Level_2
+Turks and Caicos Islands            na.
+Tuvalu                              Level_1
+U.S. Virgin Islands                 na.
+Uganda                              Level_3
+Ukraine                             Level_3
+United Arab Emirates                Level_2
+United Kingdom                      Level_1
+United States                       Level_1
+Uruguay                             Level_1
+Uzbekistan                          Level_2
+Vanuatu                             Level_2
+Venezuela                           Level_3
+Vietnam                             Level_1
+Zambia                              Level_3
+Zimbabwe                            Level_3
