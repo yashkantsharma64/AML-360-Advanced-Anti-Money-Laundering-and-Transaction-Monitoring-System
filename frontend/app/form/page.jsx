@@ -85,6 +85,7 @@ export default function AmlTransactionForm() {
 
   const submitSingle = async (e) => {
     e.preventDefault();
+    console.log(form)
     setErrors([]);
     setSuccessMsg("");
     const errs = validateSingle(form);
@@ -203,12 +204,9 @@ export default function AmlTransactionForm() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-4xl font-bold text-white">AML Fraud Detector</h1>
+            <h1 className="text-4xl font-bold text-white">Transaction Fraud Detector</h1>
           </div>
-          <p className="text-slate-400 ml-11">Detect suspicious transactions and money laundering patterns in real-time</p>
+          <p className="text-slate-400">Detect suspicious transactions and money laundering patterns in real-time</p>
         </div>
 
         {/* Tab Navigation */}
