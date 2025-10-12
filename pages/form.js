@@ -134,6 +134,8 @@ export default function TransactionForm() {
         throw new Error(result.error || 'Failed to save transaction');
       }
 
+      console.log('Transaction saved successfully:', result.transaction);
+      console.log('Transaction ID:', result.transaction._id);
       setResult(result.transaction);
     } catch (err) {
       setError('Error processing transaction: ' + err.message);
@@ -725,7 +727,11 @@ export default function TransactionForm() {
                     <Link href="/transactions" className="text-blue-600 hover:text-blue-800">
                       View All Transactions →
                     </Link>
-                    <Link href={`/dashboard/${result._id}`} className="text-blue-600 hover:text-blue-800">
+                    <Link 
+                      href={`/dashboard/${result._id}`} 
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={() => console.log('Navigating to dashboard with ID:', result._id)}
+                    >
                       View Detailed Report →
                     </Link>
                   </div>

@@ -19,6 +19,7 @@ export default function TransactionDashboard({ transactionId }) {
     const fetchTransaction = async () => {
       try {
         console.log('Fetching transaction with ID:', transactionId);
+        console.log('ID type:', typeof transactionId);
         const response = await fetch(`/api/transactions/${transactionId}`);
         const result = await response.json();
         

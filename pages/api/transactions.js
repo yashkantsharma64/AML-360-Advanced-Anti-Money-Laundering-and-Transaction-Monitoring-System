@@ -154,7 +154,7 @@ export default async function handler(req, res) {
     
     res.status(201).json({ 
       success: true, 
-      transaction: savedTransaction
+      transaction: { ...savedTransaction, _id: savedTransaction._id.toString() }
     });
   } catch (error) {
     console.error('Error saving transaction:', error);

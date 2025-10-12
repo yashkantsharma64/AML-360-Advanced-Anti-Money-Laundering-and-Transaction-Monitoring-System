@@ -39,6 +39,9 @@ export default async function handler(req, res) {
     
     const { id } = req.query;
     
+    console.log('Looking for transaction with ID:', id);
+    console.log('ID type:', typeof id);
+    
     if (!id) {
       return res.status(400).json({ 
         success: false, 
@@ -49,9 +52,14 @@ export default async function handler(req, res) {
     // Try to find by ObjectId first, then by transaction_id
     let transaction;
     try {
+      console.log('Trying ObjectId lookup...');
       transaction = await collection.findOne({ _id: new ObjectId(id) });
-    } catch {
+      console.log('ObjectId lookup result:', transaction ? 'Found' : 'Not found');
+    } catch (error) {
+      console.log('ObjectId lookup failed:', error.message);
+      console.log('Trying transaction_id lookup...');
       transaction = await collection.findOne({ transaction_id: id });
+      console.log('transaction_id lookup result:', transaction ? 'Found' : 'Not found');
     }
     
     if (!transaction) {
