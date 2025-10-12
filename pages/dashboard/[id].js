@@ -253,7 +253,7 @@ export default function TransactionDashboard({ transactionId }) {
                   </button>
                   
                   {showDownloadMenu && !downloading && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-600">
                       <button
                         onClick={() => {
                           downloadPDF();
@@ -289,7 +289,7 @@ export default function TransactionDashboard({ transactionId }) {
                 }`}>
                   {transaction.isSuspicious ? 'Suspicious' : 'Normal'}
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   Risk Score: {transaction.risk_score}
                 </span>
               </div>
@@ -301,53 +301,53 @@ export default function TransactionDashboard({ transactionId }) {
           {/* Transaction Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Transaction Details */}
-            <div className="lg:col-span-2 bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Transaction Details</h2>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Transaction Details</h2>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-3">Originator</h3>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Originator</h3>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-900"><strong>Name:</strong> {transaction.originator_name}</p>
-                      <p className="text-sm text-gray-900"><strong>Country:</strong> {transaction.originator_country}</p>
-                      <p className="text-sm text-gray-900"><strong>Address:</strong> {transaction.originator_address1}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Name:</strong> {transaction.originator_name}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Country:</strong> {transaction.originator_country}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Address:</strong> {transaction.originator_address1}</p>
                       {transaction.originator_address2 && (
-                        <p className="text-sm text-gray-900">{transaction.originator_address2}</p>
+                        <p className="text-sm text-gray-900 dark:text-white">{transaction.originator_address2}</p>
                       )}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-3">Beneficiary</h3>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Beneficiary</h3>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-900"><strong>Name:</strong> {transaction.beneficiary_name}</p>
-                      <p className="text-sm text-gray-900"><strong>Country:</strong> {transaction.beneficiary_country}</p>
-                      <p className="text-sm text-gray-900"><strong>Address:</strong> {transaction.beneficiary_address1}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Name:</strong> {transaction.beneficiary_name}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Country:</strong> {transaction.beneficiary_country}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Address:</strong> {transaction.beneficiary_address1}</p>
                       {transaction.beneficiary_address2 && (
-                        <p className="text-sm text-gray-900">{transaction.beneficiary_address2}</p>
+                        <p className="text-sm text-gray-900 dark:text-white">{transaction.beneficiary_address2}</p>
                       )}
                     </div>
                   </div>
                 </div>
                 
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-500 mb-3">Payment Information</h3>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Payment Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <p className="text-sm text-gray-900"><strong>Amount:</strong> {transaction.currency_code} {transaction.transaction_amount?.toLocaleString()}</p>
-                      <p className="text-sm text-gray-900"><strong>USD Equivalent:</strong> ${transaction.amount_usd?.toLocaleString()}</p>
-                      <p className="text-sm text-gray-900"><strong>Exchange Rate:</strong> {transaction.usd_rate?.toFixed(4)}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Amount:</strong> {transaction.currency_code} {transaction.transaction_amount?.toLocaleString()}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>USD Equivalent:</strong> ${transaction.amount_usd?.toLocaleString()}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Exchange Rate:</strong> {transaction.usd_rate?.toFixed(4)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-900"><strong>Payment Type:</strong> {transaction.payment_type}</p>
-                      <p className="text-sm text-gray-900"><strong>Date:</strong> {new Date(transaction.transaction_date).toLocaleDateString()}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Payment Type:</strong> {transaction.payment_type}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Date:</strong> {new Date(transaction.transaction_date).toLocaleDateString()}</p>
                     </div>
                   </div>
                   {transaction.payment_instruction && (
                     <div className="mt-4">
-                      <p className="text-sm text-gray-900"><strong>Payment Instruction:</strong></p>
-                      <p className="text-sm text-gray-600 mt-1 p-3 bg-gray-50 rounded">{transaction.payment_instruction}</p>
+                      <p className="text-sm text-gray-900 dark:text-white"><strong>Payment Instruction:</strong></p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 p-3 bg-gray-50 dark:bg-gray-700 rounded">{transaction.payment_instruction}</p>
                     </div>
                   )}
                 </div>
@@ -355,9 +355,9 @@ export default function TransactionDashboard({ transactionId }) {
             </div>
 
             {/* Risk Assessment */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Risk Assessment</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Risk Assessment</h2>
               </div>
               <div className="p-6">
                 <div className="text-center mb-6">
@@ -366,7 +366,7 @@ export default function TransactionDashboard({ transactionId }) {
                   }`}>
                     {transaction.risk_score}
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">Risk Score</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Risk Score</p>
                 </div>
 
                 <div className="space-y-4">
@@ -413,9 +413,9 @@ export default function TransactionDashboard({ transactionId }) {
           {/* Risk Analysis Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Rule Breakdown */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Rule Breakdown</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Rule Breakdown</h2>
               </div>
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -441,9 +441,9 @@ export default function TransactionDashboard({ transactionId }) {
             </div>
 
             {/* Triggered Rules */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Triggered Rules</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Triggered Rules</h2>
               </div>
               <div className="p-6">
                 {ruleBreakdown.length > 0 ? (
@@ -451,7 +451,7 @@ export default function TransactionDashboard({ transactionId }) {
                     {ruleBreakdown.map((rule, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-sm font-medium text-gray-900">{rule.name}</h3>
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">{rule.name}</h3>
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
                             +{rule.score}
                           </span>
@@ -465,8 +465,8 @@ export default function TransactionDashboard({ transactionId }) {
                     <svg className="w-12 h-12 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-gray-500">No rules triggered</p>
-                    <p className="text-sm text-gray-400">This transaction appears to be normal</p>
+                    <p className="text-gray-500 dark:text-gray-400">No rules triggered</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">This transaction appears to be normal</p>
                   </div>
                 )}
               </div>
@@ -474,9 +474,9 @@ export default function TransactionDashboard({ transactionId }) {
           </div>
 
           {/* Risk Factors Analysis */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Risk Factors Analysis</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Risk Factors Analysis</h2>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -490,8 +490,8 @@ export default function TransactionDashboard({ transactionId }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">Country Risk</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Country Risk</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {transaction.triggered_rules?.some(rule => rule.rule === 'High-risk country') ? 'High Risk' : 'Normal'}
                   </p>
                 </div>
@@ -506,8 +506,8 @@ export default function TransactionDashboard({ transactionId }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">Amount</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Amount</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {transaction.triggered_rules?.some(rule => rule.rule === 'High amount') ? 'High Value' : 'Normal'}
                   </p>
                 </div>
@@ -522,8 +522,8 @@ export default function TransactionDashboard({ transactionId }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">Keywords</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Keywords</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {transaction.triggered_rules?.some(rule => rule.rule === 'Suspicious keyword') ? 'Suspicious' : 'Clean'}
                   </p>
                 </div>
@@ -538,8 +538,8 @@ export default function TransactionDashboard({ transactionId }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">Structuring</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Structuring</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {transaction.triggered_rules?.some(rule => rule.rule === 'Structuring pattern') ? 'Detected' : 'Normal'}
                   </p>
                 </div>
@@ -554,8 +554,8 @@ export default function TransactionDashboard({ transactionId }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">Rounded</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Rounded</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {transaction.triggered_rules?.some(rule => rule.rule === 'Rounded amount') ? 'Rounded' : 'Normal'}
                   </p>
                 </div>
@@ -564,9 +564,9 @@ export default function TransactionDashboard({ transactionId }) {
           </div>
 
           {/* Recommendations */}
-          <div className="mt-8 bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Recommendations</h2>
+          <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recommendations</h2>
             </div>
             <div className="p-6">
               {transaction.isSuspicious ? (

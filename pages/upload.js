@@ -422,7 +422,7 @@ export default function CSVUpload() {
                       <h4 className="text-sm font-medium text-gray-700 mb-3">Sample Processed Transactions:</h4>
                       <div className="space-y-2">
                         {results.transactions.map((transaction, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-white rounded border">
+                          <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
                             <div>
                               <p className="text-sm font-medium text-gray-900">
                                 {transaction.originator_name} → {transaction.beneficiary_name}
