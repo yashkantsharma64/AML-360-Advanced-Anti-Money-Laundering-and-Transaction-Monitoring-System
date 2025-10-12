@@ -457,9 +457,9 @@ export default function Dashboard() {
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Transaction Volume */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Transaction Volume</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Transaction Volume</h2>
               </div>
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -478,9 +478,9 @@ export default function Dashboard() {
             </div>
 
             {/* Suspicious vs Normal Pie Chart */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Transaction Distribution</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Transaction Distribution</h2>
               </div>
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -510,9 +510,9 @@ export default function Dashboard() {
 
           {/* Top Suspicious Accounts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Top 5 Suspicious Accounts</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Top 5 Suspicious Accounts</h2>
               </div>
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -537,27 +537,27 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Account Details</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Account Details</h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
                   {suspiciousAccountsData.length > 0 ? (
                     suspiciousAccountsData.map((account, index) => (
-                      <div key={account.account_id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <div key={account.account_id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-900">#{index + 1} {account.account_id}</p>
-                          <p className="text-sm text-gray-600">{account.count} suspicious transactions</p>
+                          <p className="font-medium text-gray-900 dark:text-white">#{index + 1} {account.account_id}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{account.count} suspicious transactions</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-red-600">${account.totalAmount.toLocaleString()}</p>
-                          <p className="text-xs text-gray-500">Avg: ${account.avgAmount.toLocaleString()}</p>
+                          <p className="font-semibold text-red-600 dark:text-red-400">${account.totalAmount.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Avg: ${account.avgAmount.toLocaleString()}</p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-center py-8">No suspicious accounts found</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-8">No suspicious accounts found</p>
                   )}
                 </div>
               </div>
@@ -566,9 +566,9 @@ export default function Dashboard() {
 
           {/* Country Risk Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Top Countries by Suspicious Transactions</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Top Countries by Suspicious Transactions</h2>
               </div>
               <div className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
@@ -583,9 +583,9 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Top Suspicious Keywords</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Top Suspicious Keywords</h2>
               </div>
               <div className="p-6">
                 {keywordData.length > 0 ? (
@@ -600,7 +600,7 @@ export default function Dashboard() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-500">No suspicious keywords detected</p>
+                    <p className="text-gray-500 dark:text-gray-400">No suspicious keywords detected</p>
                   </div>
                 )}
               </div>
@@ -608,17 +608,17 @@ export default function Dashboard() {
           </div>
 
           {/* Time Series Analysis */}
-          <div className="bg-white rounded-lg shadow mb-8">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 mb-8">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-medium text-gray-900">Transaction Trends Over Time</h2>
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Transaction Trends Over Time</h2>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setTimePeriod('days')}
                     className={`px-3 py-1 text-sm rounded-md ${
                       timePeriod === 'days' 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                     }`}
                   >
                     Days
@@ -628,7 +628,7 @@ export default function Dashboard() {
                     className={`px-3 py-1 text-sm rounded-md ${
                       timePeriod === 'months' 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                     }`}
                   >
                     Months
@@ -638,7 +638,7 @@ export default function Dashboard() {
                     className={`px-3 py-1 text-sm rounded-md ${
                       timePeriod === 'years' 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                     }`}
                   >
                     Years
@@ -718,16 +718,16 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No time series data available for the selected period</p>
+                  <p className="text-gray-500 dark:text-gray-400">No time series data available for the selected period</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Risk Heatmap */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Country Risk Heatmap</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Country Risk Heatmap</h2>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -740,8 +740,8 @@ export default function Dashboard() {
                     }`}>
                       {country.country}
                     </div>
-                    <p className="text-xs text-gray-600">{country.suspiciousRate}%</p>
-                    <p className="text-xs text-gray-500">{country.suspicious}/{country.total}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">{country.suspiciousRate}%</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{country.suspicious}/{country.total}</p>
                   </div>
                 ))}
               </div>
