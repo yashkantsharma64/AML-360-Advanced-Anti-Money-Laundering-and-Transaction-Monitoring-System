@@ -315,11 +315,6 @@ transactions_backup.json
 risk_reports/
 audit_logs/
 
-# Large dataset files
-dataset/large_files/
-*.zip
-*.rar
-*.7z
 
 # Model files
 models/
