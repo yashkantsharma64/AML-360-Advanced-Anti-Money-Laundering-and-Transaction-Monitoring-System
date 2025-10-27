@@ -59,4 +59,4 @@ rag_chain = create_retrieval_chain(retriever, question_answer_chain)
 query = "What was the transaction with transaction_id 'f207dcd6-f136-44ea-9d0c-a091d8494005' suspicious?"
 
 answer= rag_chain.invoke({"input": query})
-print(answer['answer'])
+print(answer['answer']) 
